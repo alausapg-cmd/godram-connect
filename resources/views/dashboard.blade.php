@@ -129,7 +129,34 @@
         @endisset
 
         {{-- Everyone: personal area --}}
+        @if ($queues->isNotEmpty())
+            <div class="mt-8 flex flex-wrap gap-3">
+                @foreach ($queues as [$count, $noun, $label, $url])
+                    <a href="{{ $url }}" class="card flex items-center gap-3 px-4 py-3 no-underline hover:border-ink-soft"><span class="font-display text-2xl font-semibold text-curtain">{{ $count }}</span><span class="text-sm font-semibold text-ink">{{ $label }}</span><x-icon name="chevron-right" class="size-4 text-ink-soft" /></a>
+                @endforeach
+            </div>
+        @endif
         <div class="mt-8 grid gap-4 lg:grid-cols-3">
+            <div class="card-pad lg:col-span-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="h-section">Coming up</h2>
+                    <a href="{{ route('events') }}" class="link text-sm">All events</a>
+                </div>
+                @if ($events->isNotEmpty())
+                    <div class="mt-3 grid gap-3 md:grid-cols-3">
+                        @foreach ($events as $event)
+                            <div class="relative">
+                                <x-event-card :event="$event" class="h-full" />
+                                @if (in_array($event->id, $places))<span class="badge-ok absolute right-3 top-3">You are going</span>@endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="mt-2 text-sm text-ink-soft">No events on the calendar yet.@if (can_do('events.create')) <a href="{{ route('events.create') }}" class="link">Add one</a>.@endif</p>
+                @endif
+            </div>
+        </div>
+        <div class="mt-4 grid gap-4 lg:grid-cols-3">
             <div class="card-pad lg:col-span-2">
                 <div class="flex items-center justify-between">
                     <h2 class="h-section">Announcements for you</h2>
@@ -168,6 +195,7 @@
                     <p class="font-semibold">Coming next</p>
                     <p class="mt-1 text-ink-soft">My Learning, My Results and My Certificates arrive with the GODRAM Virtual Academy.</p>
                 </div>
+                <a href="{{ route('stories.create') }}" class="mt-3 flex items-center gap-3 rounded-xl border border-line p-4 text-sm no-underline hover:border-ink-soft"><x-icon name="quote" class="size-5 text-poster" /><span><span class="block font-semibold text-ink">Share your story</span><span class="text-ink-soft">A testimony or a production you were part of</span></span></a>
             </div>
         </div>
     </section>

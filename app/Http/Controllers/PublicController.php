@@ -4,15 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityReport;
 use App\Models\Announcement;
+use App\Models\Event;
 use App\Models\Member;
 use App\Models\OrgUnit;
+use App\Models\Spotlight;
+use App\Models\Story;
+use App\Models\Video;
 use Illuminate\Http\Request;
 
 class PublicController extends Controller
 {
     public function home(Request $request)
     {
+        $user = $request->user();
+        $upcoming = Event::visibleTo($user)->where('status', 'published')->upcoming()->with('orgUnit.parent')->limit(6)->get();
+        $facts = config('godram.did_you_know', []);
+
         return view('public.home', [
+            'live' => $upcoming->first(fn ($e) => $e->isLive()),
+            'upcoming' => $upcoming->reject->isLive()->take(3)->values(),
+            'performance' => Spotlight::currentSubject('performance_of_week'),
+            'story' => Story::published()->orderByDesc('is_featured')->latest('published_at')->first(),
+            'videos' => Video::published()->latest('published_at')->limit(8)->get(),
+            'fact' => $facts ? $facts[now()->dayOfYear % count($facts)] : null,
             'announcements' => Announcement::live()->public()->orderByDesc('is_pinned')->latest('published_at')->limit(3)->get(),
             'highlights' => ActivityReport::where('status', 'published')->with(['orgUnit.parent', 'media'])->latest('published_at')->limit(3)->get(),
             'archive' => collect(config('archive'))->take(8),
@@ -49,27 +63,7 @@ class PublicController extends Controller
         return view('public.highlight', ['report' => $report->load('orgUnit.parent', 'media')]);
     }
 
-    public function watch()
-    {
-        return view('public.coming', [
-            'title' => 'Watch',
-            'eyebrow' => 'GODRAM TV',
-            'lead' => 'Films, drama performances, live broadcasts and behind-the-scenes stories, all in one place.',
-            'body' => 'The Watch centre is being built in the next phase. Until then, every GODRAM TV video is on YouTube.',
-            'cta' => ['label' => 'Watch GODRAM TV on YouTube', 'url' => config('godram.links.youtube')],
-        ]);
-    }
 
-    public function events()
-    {
-        return view('public.coming', [
-            'title' => 'Events',
-            'eyebrow' => 'Performances, trainings and programmes',
-            'lead' => 'Find GODRAM performances, workshops, conventions and premieres near you.',
-            'body' => 'The events calendar arrives in the next phase. Meanwhile, the latest news carries upcoming programmes.',
-            'cta' => ['label' => 'See the latest news', 'url' => route('announcements.index')],
-        ]);
-    }
 
     public function academy()
     {

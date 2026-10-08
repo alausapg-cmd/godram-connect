@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityReport;
 use App\Models\Announcement;
+use App\Models\Event;
+use App\Models\EventRegistration;
 use App\Models\Member;
 use App\Models\OrgUnit;
+use App\Models\Story;
 use App\Models\TransferRequest;
+use App\Models\Video;
 use App\Services\Access;
 use App\Services\MembershipService;
 use App\Services\ReportWorkflow;
@@ -40,6 +44,13 @@ class DashboardController extends Controller
             'myReports' => $member ? $member->reports()->counted()->latest('activity_date')->limit(5)->get() : collect(),
             'scopes' => $scopes,
             'scope' => $scope,
+            'events' => Event::visibleTo($user)->where('status', 'published')->upcoming()->limit(3)->get(),
+            'places' => $member ? EventRegistration::where('member_id', $member->id)->where('status', 'registered')
+                ->whereHas('event', fn ($q) => $q->upcoming())->pluck('event_id')->all() : [],
+            'queues' => collect([
+                $this->access->can($user, 'stories.review') ? [Story::whereIn('status', ['submitted', 'under_review', 'approved'])->count(), 'story', 'stories to review', route('stories.manage')] : null,
+                $this->access->can($user, 'media.manage') ? [Video::where('status', 'submitted')->count(), 'video', 'suggested videos to check', route('videos.manage')] : null,
+            ])->filter(fn ($q) => $q && $q[0] > 0)->values(),
         ];
 
         if ($scope) {

@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'hideErrors' => false, 'dark' => false])
+@props(['title' => null, 'description' => null, 'image' => null, 'hideErrors' => false, 'dark' => false])
 @php
     $user = auth()->user();
     $workspace = $user ? array_filter([
@@ -6,14 +6,16 @@
         ['Members', 'members.index', 'users', can_do('members.view')],
         ['Reports', 'reports.index', 'report', can_do('reports.view') || can_do('reports.create')],
         ['Announcements', 'announcements.manage', 'megaphone', can_do('announcements.create') || can_do('announcements.publish')],
+        ['Videos', 'videos.manage', 'play', can_do('media.submit')],
+        ['Stories', can_do('stories.review') ? 'stories.manage' : 'stories.mine', 'quote', true],
         ['Transfers', 'transfers.index', 'transfer', can_do('members.transfer.approve') || can_do('members.transfer.request')],
         ['Structure', 'admin.units.index', 'network', can_do('org.manage')],
         ['Roles', 'admin.roles.index', 'shield', can_do('roles.manage')],
         ['Audit log', 'admin.audit.index', 'history', can_do('audit.view')],
     ], fn ($i) => $i[3]) : [];
     $public = [
-        ['Home', 'home'], ['About', 'about'], ['Watch', 'watch'], ['Events', 'events'],
-        ['Academy', 'academy'], ['News', 'announcements.index'], ['Network', 'network'], ['Archive', 'archive'],
+        ['Home', 'home'], ['About', 'about'], ['Watch', 'watch'], ['Events', 'events'], ['Stories', 'stories'],
+        ['Showcase', 'showcase'], ['Academy', 'academy'], ['News', 'announcements.index'],
     ];
 @endphp
 <!DOCTYPE html>
@@ -24,9 +26,13 @@
     <title>{{ $title ? $title.' · ' : '' }}GODRAM CONNECT</title>
     <meta name="description" content="{{ $description ?? 'The digital home of the GOFAMINT Drama & Film Ministry: connect, report, create, train, watch and celebrate.' }}">
     <meta name="theme-color" content="#16120f">
+    <meta property="og:site_name" content="GODRAM CONNECT">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="{{ $title ?? 'GODRAM CONNECT' }}">
     <meta property="og:description" content="{{ $description ?? 'GODRAM is alive. GODRAM is creative. GODRAM is connected.' }}">
-    <meta property="og:image" content="{{ asset('images/archive/godram-10.webp') }}">
+    <meta property="og:image" content="{{ $image ?? asset('images/share-default.png') }}">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -52,6 +58,7 @@
             @endforeach
         </nav>
         <div class="flex items-center gap-2">
+            <a href="{{ route('search') }}" class="rounded-full p-2 text-paper/75 hover:text-white" title="Search"><x-icon name="search" /><span class="sr-only">Search</span></a>
             @auth
                 <a href="{{ route('dashboard') }}" class="hidden items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-sm font-medium text-paper no-underline hover:bg-white/15 sm:flex">
                     @if ($user->member)<x-avatar :member="$user->member" size="size-8" />@endif
@@ -99,6 +106,7 @@
                 <li><a class="hover:text-white" href="{{ route('network') }}">The GODRAM network</a></li>
                 <li><a class="hover:text-white" href="{{ route('highlights') }}">Ministry highlights</a></li>
                 <li><a class="hover:text-white" href="{{ route('archive') }}">From the archive</a></li>
+                <li><a class="hover:text-white" href="{{ route('search') }}">Search everything</a></li>
             </ul>
         </div>
         <div class="text-sm">
@@ -140,7 +148,7 @@
             </div>
         @endauth
         <div class="mt-4 grid grid-cols-2 gap-2">
-            @foreach ([['About GODRAM', 'about'], ['News', 'announcements.index'], ['Network', 'network'], ['Archive', 'archive'], ['Highlights', 'highlights']] as [$label, $route])
+            @foreach ([['Stories', 'stories'], ['Showcase', 'showcase'], ['News', 'announcements.index'], ['About GODRAM', 'about'], ['Network', 'network'], ['Archive', 'archive'], ['Highlights', 'highlights'], ['Search', 'search']] as [$label, $route])
                 <a href="{{ route($route) }}" class="rounded-xl border border-line bg-white p-3 text-sm font-medium no-underline">{{ $label }}</a>
             @endforeach
         </div>

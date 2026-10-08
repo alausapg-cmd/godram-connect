@@ -4,18 +4,24 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\CoverController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportMediaController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ShowcaseController;
 use App\Http\Controllers\SignupController;
+use App\Http\Controllers\StoryController;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 
 // Public experience
@@ -24,8 +30,6 @@ Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/archive', [PublicController::class, 'archive'])->name('archive');
 Route::get('/highlights', [PublicController::class, 'highlights'])->name('highlights');
 Route::get('/highlights/{report}', [PublicController::class, 'highlight'])->name('highlights.show');
-Route::get('/watch', [PublicController::class, 'watch'])->name('watch');
-Route::get('/events', [PublicController::class, 'events'])->name('events');
 Route::get('/academy', [PublicController::class, 'academy'])->name('academy');
 Route::get('/network/{unit?}', [NetworkController::class, 'show'])->name('network');
 Route::get('/news', [AnnouncementController::class, 'index'])->name('announcements.index');
@@ -33,6 +37,9 @@ Route::get('/news/{announcement}', [AnnouncementController::class, 'show'])->nam
 Route::get('/news/{announcement}/image', [AnnouncementController::class, 'image'])->name('announcements.image');
 Route::get('/media/reports/{media}', [ReportMediaController::class, 'show'])->name('report-media.show');
 Route::get('/offline', fn () => view('offline'))->name('offline');
+Route::get('/search', SearchController::class)->name('search');
+Route::get('/covers/{type}/{id}', [CoverController::class, 'show'])->whereNumber('id')->name('covers.show');
+Route::get('/share/{type}/{slug}.png', [CoverController::class, 'share'])->name('share.card');
 
 // Sign-in
 Route::middleware('guest')->group(function () {
@@ -105,6 +112,40 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/announcements/{announcement}/decide', [AnnouncementController::class, 'decide'])->name('announcements.decide');
     Route::post('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])->name('announcements.archive');
 
+    // Events
+    Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
+    Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
+    Route::post('/events/{event}/cancel', [EventController::class, 'cancel'])->name('events.cancel');
+    Route::delete('/events/{event}/register', [EventController::class, 'unregister'])->name('events.unregister');
+    Route::get('/events/{event}/registrations', [EventController::class, 'registrations'])->name('events.registrations');
+    Route::post('/events/{event}/registrations/{registration}/attended', [EventController::class, 'markAttended'])->name('events.attended');
+
+    // GODRAM TV
+    Route::get('/videos/manage', [VideoController::class, 'manage'])->name('videos.manage');
+    Route::get('/videos/create', [VideoController::class, 'create'])->name('videos.create');
+    Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');
+    Route::get('/videos/{video}/edit', [VideoController::class, 'edit'])->name('videos.edit');
+    Route::put('/videos/{video}', [VideoController::class, 'update'])->name('videos.update');
+    Route::post('/videos/{video}/decide', [VideoController::class, 'decide'])->name('videos.decide');
+
+    // Creative Showcase
+    Route::get('/showcase/create', [ShowcaseController::class, 'create'])->name('showcase.create');
+    Route::post('/showcase', [ShowcaseController::class, 'store'])->name('showcase.store');
+    Route::get('/showcase/{production}/edit', [ShowcaseController::class, 'edit'])->name('showcase.edit');
+    Route::put('/showcase/{production}', [ShowcaseController::class, 'update'])->name('showcase.update');
+    Route::post('/showcase/{production}/spotlight', [ShowcaseController::class, 'spotlight'])->name('showcase.spotlight');
+
+    // Stories
+    Route::get('/stories/mine', [StoryController::class, 'mine'])->name('stories.mine');
+    Route::get('/stories/manage', [StoryController::class, 'manage'])->name('stories.manage');
+    Route::get('/stories/create', [StoryController::class, 'create'])->name('stories.create');
+    Route::post('/stories', [StoryController::class, 'store'])->name('stories.store');
+    Route::get('/stories/{story}/edit', [StoryController::class, 'edit'])->name('stories.edit');
+    Route::put('/stories/{story}', [StoryController::class, 'update'])->name('stories.update');
+    Route::post('/stories/{story}/review', [StoryController::class, 'review'])->name('stories.review');
+
     // Administration
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/structure', [OrgUnitController::class, 'index'])->name('units.index');
@@ -116,3 +157,16 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
     });
 });
+
+// Public pages with slugs come last, so /events/create and the like are matched first.
+Route::get('/events', [EventController::class, 'index'])->name('events');
+Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+Route::get('/events/{event}/calendar.ics', [EventController::class, 'calendar'])->name('events.calendar');
+Route::post('/events/{event}/register', [EventController::class, 'register'])->middleware('throttle:10,1')->name('events.register');
+Route::get('/watch', [VideoController::class, 'index'])->name('watch');
+Route::get('/watch/{video}', [VideoController::class, 'show'])->name('watch.show');
+Route::get('/showcase', [ShowcaseController::class, 'index'])->name('showcase');
+Route::get('/showcase/{production}', [ShowcaseController::class, 'show'])->name('showcase.show');
+Route::get('/stories', [StoryController::class, 'index'])->name('stories');
+Route::get('/stories/{story}', [StoryController::class, 'show'])->name('stories.show');
+Route::get('/stories/{story}/audio', [StoryController::class, 'audio'])->name('stories.audio');

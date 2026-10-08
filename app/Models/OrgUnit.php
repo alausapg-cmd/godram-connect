@@ -114,7 +114,11 @@ class OrgUnit extends Model
 
     public function fullName(): string
     {
-        return in_array($this->type, [self::NATIONAL]) ? $this->name : $this->name.' '.$this->typeLabel();
+        if ($this->type === self::NATIONAL || str_contains(mb_strtolower($this->name), mb_strtolower($this->typeLabel()))) {
+            return $this->name;
+        }
+
+        return $this->name.' '.$this->typeLabel();
     }
 
     public static function root(): ?OrgUnit

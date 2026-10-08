@@ -15,7 +15,7 @@
             <p class="mt-5 max-w-xl text-lg text-paper/85">Since 1991, GODRAM has carried the Gospel through drama and film, from Assembly halls to the National Theatre. GODRAM CONNECT brings the whole ministry together in one place.</p>
             <div class="mt-8 flex flex-wrap gap-3">
                 <a href="{{ route('about') }}" class="btn-primary no-underline">Explore GODRAM <x-icon name="arrow-right" class="size-4" /></a>
-                <a href="{{ config('godram.links.youtube') }}" target="_blank" rel="noopener" class="btn border border-paper/30 text-paper no-underline hover:bg-white/10"><x-icon name="play" class="size-4" /> Watch GODRAM TV</a>
+                <a href="{{ route('watch') }}" class="btn border border-paper/30 text-paper no-underline hover:bg-white/10"><x-icon name="play" class="size-4" /> Watch GODRAM TV</a>
                 @guest<a href="{{ route('register') }}" class="btn-gold no-underline">Join the movement</a>@endguest
             </div>
         </div>
@@ -32,6 +32,77 @@
             @endforeach
         </div>
     </section>
+
+    {{-- GODRAM Today --}}
+    <section class="container-page mt-12">
+        <p class="eyebrow">{{ now()->format('l j F') }}</p>
+        <h2 class="h-section mt-1 text-2xl">GODRAM Today</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            @if ($live)
+                <a href="{{ route('events.show', $live) }}" class="flex flex-col justify-between rounded-[var(--radius-card)] bg-curtain p-5 text-white no-underline lg:col-span-2">
+                    <span class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest"><span class="size-2 animate-pulse rounded-full bg-white"></span> Live now</span>
+                    <span class="mt-4 font-display text-2xl font-semibold uppercase leading-tight">{{ $live->title }}</span>
+                    <span class="mt-2 text-sm text-white/80">{{ $live->platformLabel() }} · {{ $live->organiserName() }}</span>
+                </a>
+            @elseif ($upcoming->first())
+                @php $next = $upcoming->first(); @endphp
+                <a href="{{ route('events.show', $next) }}" class="flex flex-col justify-between rounded-[var(--radius-card)] bg-stage p-5 text-paper no-underline">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-gold">Next on the calendar</span>
+                    <span class="mt-4 font-display text-xl font-semibold uppercase leading-tight">{{ $next->title }}</span>
+                    <span class="mt-2 text-sm text-paper/70">{{ $next->starts_at->format('D j M, g:ia') }}<br>{{ $next->is_online ? 'Online' : $next->location }}</span>
+                </a>
+            @endif
+
+            @if ($performance)
+                <a href="{{ route('watch.show', $performance) }}" class="group relative flex min-h-48 flex-col justify-end overflow-hidden rounded-[var(--radius-card)] bg-stage p-5 text-paper no-underline">
+                    <img src="{{ $performance->thumbnailUrl('hqdefault') }}" alt="" class="absolute inset-0 size-full object-cover opacity-50 transition group-hover:opacity-60" loading="lazy">
+                    <span class="relative text-xs font-semibold uppercase tracking-widest text-gold">Performance of the Week</span>
+                    <span class="relative mt-1 font-display text-xl font-semibold uppercase leading-tight">{{ $performance->title }}</span>
+                </a>
+            @endif
+
+            @if ($story)
+                <a href="{{ route('stories.show', $story) }}" class="card flex flex-col p-5 no-underline hover:border-ink-soft">
+                    <span class="eyebrow">{{ $story->typeLabel() }}</span>
+                    <span class="mt-2 font-display text-xl font-semibold uppercase leading-tight text-stage">{{ $story->title }}</span>
+                    @if ($story->standfirst)<span class="mt-2 line-clamp-3 font-serif text-ink-soft">{{ $story->standfirst }}</span>@endif
+                    <span class="mt-auto pt-3 text-sm font-semibold text-curtain">Read the story</span>
+                </a>
+            @endif
+
+            @if ($fact)
+                <div class="rounded-[var(--radius-card)] border border-gold/50 bg-gold/15 p-5">
+                    <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-warn"><x-icon name="sparkles" class="size-4" /> Did you know?</p>
+                    <p class="mt-3 font-serif text-lg leading-snug text-ink">{{ $fact }}</p>
+                    <a href="{{ route('about') }}" class="mt-3 inline-block text-sm font-semibold text-curtain">The GODRAM story</a>
+                </div>
+            @endif
+        </div>
+    </section>
+
+    @if ($videos->isNotEmpty())
+        <section class="mt-12 bg-stage py-10 text-paper">
+            <div class="container-page">
+                <div class="flex items-end justify-between">
+                    <div><p class="eyebrow text-gold">GODRAM TV</p><h2 class="mt-1 font-display text-2xl font-semibold uppercase">Watch next</h2></div>
+                    <a href="{{ route('watch') }}" class="text-sm font-semibold text-gold no-underline">The Watch centre</a>
+                </div>
+                <div class="mt-5 flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+                    @foreach ($videos as $video)<x-video-card :video="$video" dark class="w-64 shrink-0 sm:w-72" />@endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if ($upcoming->isNotEmpty())
+        <section class="container-page mt-12">
+            <div class="flex items-end justify-between">
+                <div><p class="eyebrow">Come and see</p><h2 class="h-section mt-1 text-2xl">Coming up</h2></div>
+                <a href="{{ route('events') }}" class="link text-sm">All events</a>
+            </div>
+            <div class="mt-5 grid gap-3 md:grid-cols-3">@foreach ($upcoming as $event)<x-event-card :event="$event" />@endforeach</div>
+        </section>
+    @endif
 
     {{-- This week --}}
     <section class="container-page mt-12">

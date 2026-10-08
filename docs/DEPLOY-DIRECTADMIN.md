@@ -128,6 +128,7 @@ cd ~/godram-connect && php artisan schedule:run >> /dev/null 2>&1
 cd ~/godram-connect
 php artisan down
 php artisan migrate --force
+php artisan db:seed --class=AccessSeeder --force   # adds any new permissions; safe to repeat
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 php artisan up
 ```
