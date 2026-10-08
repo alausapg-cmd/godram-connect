@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+/* Fonts are bundled at build time and served from our own server. */
+@import '@fontsource-variable/oswald/wght.css';
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/source-serif-4/wght.css';
+@import '@fontsource-variable/source-serif-4/wght-italic.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+/* GODRAM design tokens, taken from the 1990s crusade posters in the archive. */
+@theme {
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Oswald Variable', 'Arial Narrow', ui-sans-serif, sans-serif;
+    --font-serif: 'Source Serif 4 Variable', Georgia, serif;
+
+    --color-stage: #16120f;
+    --color-stage-2: #231d18;
+    --color-curtain: #b3261e;
+    --color-curtain-dark: #8f1d17;
+    --color-poster: #e5622a;
+    --color-gold: #f0b03c;
+    --color-paper: #f7f0e4;
+    --color-paper-2: #efe5d4;
+    --color-ink: #2a2420;
+    --color-ink-soft: #5d544c;
+    --color-line: #e2d6c3;
+    --color-ok: #2f7d4f;
+    --color-warn: #a86411;
+
+    --radius-card: 14px;
+}
+
+@layer base {
+    html { -webkit-text-size-adjust: 100%; }
+    body { @apply bg-paper text-ink font-sans antialiased; }
+    h1, h2, h3, .font-display { @apply font-display tracking-tight; }
+    :focus-visible { outline: 3px solid var(--color-poster); outline-offset: 2px; }
+    a { @apply underline-offset-2; }
+    [x-cloak] { display: none !important; }
+}
+
+@layer components {
+    .container-page { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+
+    .btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50; }
+    .btn-primary { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 bg-curtain text-white hover:bg-curtain-dark; }
+    .btn-dark { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 bg-stage text-paper hover:bg-stage-2; }
+    .btn-ghost { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 border border-line bg-white text-ink hover:border-ink-soft; }
+    .btn-gold { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:opacity-50 bg-gold text-stage hover:brightness-95; }
+    .btn-sm { @apply min-h-9 px-4 text-xs; }
+
+    .card { @apply rounded-[var(--radius-card)] border border-line bg-white; }
+    .card-pad { @apply rounded-[var(--radius-card)] border border-line bg-white p-5 sm:p-6; }
+
+    .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.16em] text-poster; }
+    .h-page { @apply font-display text-3xl font-semibold uppercase text-stage sm:text-4xl; }
+    .h-section { @apply font-display text-xl font-semibold uppercase tracking-wide text-stage; }
+    .muted { @apply text-ink-soft; }
+
+    .label { @apply mb-1.5 block text-sm font-semibold text-ink; }
+    .hint { @apply mt-1 text-xs text-ink-soft; }
+    .input { @apply block min-h-11 w-full rounded-xl border border-line bg-white px-3.5 text-base text-ink placeholder:text-ink-soft/60 focus:border-poster focus:outline-none focus:ring-2 focus:ring-poster/30; }
+    textarea.input { @apply py-2.5; }
+    .error { @apply mt-1 text-sm font-medium text-curtain; }
+
+    .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+    .badge-neutral { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-paper-2 text-ink; }
+    .badge-ok { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-ok/10 text-ok; }
+    .badge-warn { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gold/25 text-warn; }
+    .badge-bad { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-curtain/10 text-curtain; }
+    .badge-info { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-poster/10 text-poster; }
+
+    .table { @apply w-full text-left text-sm; }
+    .table th { @apply border-b border-line px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink-soft; }
+    .table td { @apply border-b border-line/70 px-3 py-3 align-top; }
+
+    .link { @apply font-semibold text-curtain underline decoration-curtain/30 hover:decoration-curtain; }
+
+    .poster-stripe { background: repeating-linear-gradient(-45deg, var(--color-poster) 0 10px, var(--color-curtain) 10px 20px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}

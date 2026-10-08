@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, pdo_sqlite, mbstring, intl
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: npm ci && npm run build
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
+
+  package:
+    # A ready-to-upload zip for DirectAdmin: production vendor folder and built assets included.
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, mbstring, intl
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
+      - run: npm ci && npm run build && rm -rf node_modules
+      - name: Build package
+        run: |
+          mkdir -p dist
+          zip -qr dist/godram-connect.zip . \
+            -x '.git/*' '.github/*' 'tests/*' 'dist/*' '.env' 'database/*.sqlite' 'storage/logs/*.log' \
+               'storage/framework/sessions/*' 'storage/framework/views/*.php' 'storage/framework/cache/data/*'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godram-connect-${{ github.sha }}
+          path: dist/godram-connect.zip
+          retention-days: 30

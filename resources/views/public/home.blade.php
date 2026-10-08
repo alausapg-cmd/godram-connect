@@ -1,0 +1,129 @@
+<x-layouts.app description="GODRAM CONNECT brings together the GOFAMINT Drama & Film Ministry: its members, stages, films, training and stories.">
+    {{-- Hero --}}
+    <section class="relative overflow-hidden bg-stage text-paper">
+        <div class="absolute inset-0 grid grid-cols-3 opacity-35" aria-hidden="true">
+            <img src="{{ asset('images/archive/godram-10.webp') }}" alt="" class="h-full w-full object-cover">
+            <img src="{{ asset('images/archive/godram-11.webp') }}" alt="" class="h-full w-full object-cover">
+            <img src="{{ asset('images/archive/godram-21.webp') }}" alt="" class="h-full w-full object-cover">
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-stage via-stage/85 to-stage/40" aria-hidden="true"></div>
+        <div class="container-page relative py-16 sm:py-24">
+            <p class="eyebrow text-gold">GOFAMINT Drama &amp; Film Ministry</p>
+            <h1 class="mt-3 max-w-3xl font-display text-5xl font-bold uppercase leading-[0.95] sm:text-7xl">
+                The Stage.<br>The Story.<br><span class="text-poster">The Mission.</span>
+            </h1>
+            <p class="mt-5 max-w-xl text-lg text-paper/85">Since 1991, GODRAM has carried the Gospel through drama and film, from Assembly halls to the National Theatre. GODRAM CONNECT brings the whole ministry together in one place.</p>
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="{{ route('about') }}" class="btn-primary no-underline">Explore GODRAM <x-icon name="arrow-right" class="size-4" /></a>
+                <a href="{{ config('godram.links.youtube') }}" target="_blank" rel="noopener" class="btn border border-paper/30 text-paper no-underline hover:bg-white/10"><x-icon name="play" class="size-4" /> Watch GODRAM TV</a>
+                @guest<a href="{{ route('register') }}" class="btn-gold no-underline">Join the movement</a>@endguest
+            </div>
+        </div>
+    </section>
+
+    {{-- Network at a glance --}}
+    <section class="border-b border-line bg-white">
+        <div class="container-page grid grid-cols-2 divide-line sm:grid-cols-4 sm:divide-x">
+            @foreach ([['Regions', $counts['regions']], ['Districts', $counts['districts']], ['Assemblies', $counts['assemblies']], ['Active members', $counts['members']]] as [$label, $value])
+                <a href="{{ route('network') }}" class="px-4 py-5 text-center no-underline">
+                    <span class="block font-display text-3xl font-semibold text-stage">{{ number_format($value) }}</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-ink-soft">{{ $label }}</span>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- This week --}}
+    <section class="container-page mt-12">
+        <div class="flex items-end justify-between gap-4">
+            <div>
+                <p class="eyebrow">This week in GODRAM</p>
+                <h2 class="mt-1 h-section text-2xl">News and announcements</h2>
+            </div>
+            <a href="{{ route('announcements.index') }}" class="link text-sm">All news</a>
+        </div>
+        @if ($announcements->isEmpty())
+            <x-empty title="No news yet" class="mt-5">Announcements from National, Regional and District coordinators will appear here.</x-empty>
+        @else
+            <div class="mt-5 grid gap-4 md:grid-cols-3">
+                @foreach ($announcements as $a)
+                    <a href="{{ route('announcements.show', $a) }}" class="card group flex flex-col p-5 no-underline transition-shadow hover:shadow-lg">
+                        <p class="text-xs font-semibold text-ink-soft">{{ $a->published_at->format('j M Y') }} @if($a->is_pinned)<span class="badge-info ml-1">Featured</span>@endif</p>
+                        <h3 class="mt-2 font-display text-xl font-semibold uppercase leading-tight text-stage group-hover:text-curtain">{{ $a->title }}</h3>
+                        <p class="mt-2 line-clamp-3 text-sm text-ink-soft">{{ $a->body }}</p>
+                        <span class="mt-auto pt-4 text-sm font-semibold text-curtain">Read more</span>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    {{-- Highlights --}}
+    <section class="container-page mt-14">
+        <div class="flex items-end justify-between gap-4">
+            <div>
+                <p class="eyebrow">GODRAM in action</p>
+                <h2 class="mt-1 h-section text-2xl">From the field</h2>
+            </div>
+            <a href="{{ route('highlights') }}" class="link text-sm">All highlights</a>
+        </div>
+        @if ($highlights->isEmpty())
+            <x-empty title="Highlights coming soon" class="mt-5">Approved reports of performances and outreaches will be featured here.</x-empty>
+        @else
+            <div class="mt-5 grid gap-4 md:grid-cols-3">
+                @foreach ($highlights as $r)
+                    @include('public.partials.highlight-card', ['report' => $r])
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    {{-- Academy --}}
+    <section class="container-page mt-14">
+        <div class="grid overflow-hidden rounded-3xl bg-stage text-paper md:grid-cols-2">
+            <div class="p-8 sm:p-10">
+                <p class="eyebrow text-gold">GODRAM Virtual Academy</p>
+                <h2 class="mt-2 font-display text-3xl font-semibold uppercase leading-tight">Trained for the stage.<br>Sent with the message.</h2>
+                <p class="mt-4 text-paper/80">Courses in Christian drama, acting, directing, scriptwriting and production, with examinations and verifiable certificates. Building on the GODRAM Institute of Christian Drama, whose first 41 drama ministers graduated in 1995.</p>
+                <a href="{{ route('academy') }}" class="btn-gold mt-6 no-underline">About the Academy</a>
+            </div>
+            <div class="relative h-64 md:h-auto">
+                <img src="{{ asset('images/archive/godram-31.webp') }}" alt="1999 GICD training programme flyer listing courses for the Ordinary and Advanced Certificate in Christian Drama" class="absolute inset-0 h-full w-full object-cover object-top" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    {{-- Throwback --}}
+    <section class="mt-14">
+        <div class="container-page flex items-end justify-between gap-4">
+            <div>
+                <p class="eyebrow">Throwback</p>
+                <h2 class="mt-1 h-section text-2xl">From the GODRAM archive</h2>
+            </div>
+            <a href="{{ route('archive') }}" class="link text-sm">Open the archive</a>
+        </div>
+        <div class="container-page mt-5 flex snap-x gap-4 overflow-x-auto pb-4">
+            @foreach ($archive as $item)
+                <figure class="w-56 shrink-0 snap-start">
+                    <img src="{{ asset('images/archive/'.$item['file']) }}" alt="{{ $item['title'] }}: {{ $item['caption'] }}" class="aspect-[3/4] w-full rounded-xl object-cover" loading="lazy">
+                    <figcaption class="mt-2 text-sm"><span class="font-semibold">{{ $item['title'] }}</span>@if($item['year']) <span class="text-ink-soft">· {{ $item['year'] }}</span>@endif</figcaption>
+                </figure>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- Join --}}
+    <section class="container-page mt-14">
+        <div class="card-pad flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="font-display text-2xl font-semibold uppercase text-stage">Part of a GODRAM team?</h2>
+                <p class="mt-1 text-ink-soft">Join GODRAM CONNECT to keep your record, follow your Assembly and grow your gifts.</p>
+            </div>
+            @auth
+                <a href="{{ route('dashboard') }}" class="btn-primary no-underline">Go to My GODRAM</a>
+            @else
+                <a href="{{ route('register') }}" class="btn-primary no-underline">Join the movement</a>
+            @endauth
+        </div>
+    </section>
+</x-layouts.app>
