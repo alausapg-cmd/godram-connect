@@ -191,10 +191,13 @@
                         <a href="{{ route('profile.edit') }}" class="btn-ghost btn-sm no-underline">Edit skills</a>
                     </div>
                 @endif
-                <div class="mt-6 rounded-xl bg-paper-2 p-4 text-sm">
-                    <p class="font-semibold">Coming next</p>
-                    <p class="mt-1 text-ink-soft">My Learning, My Results and My Certificates arrive with the GODRAM Virtual Academy.</p>
-                </div>
+                <a href="{{ route('academy.mine') }}" class="mt-6 flex items-center gap-3 rounded-xl bg-stage p-4 text-sm text-paper no-underline">
+                    <x-icon name="academy" class="size-6 shrink-0 text-gold" />
+                    <span class="min-w-0 flex-1"><span class="block font-semibold">My learning</span>
+                        @php $learning = \App\Models\Enrolment::where('member_id', auth()->user()->member_id ?? 0)->where('status', 'active')->count(); @endphp
+                        <span class="text-paper/70">{{ $learning ? $learning.' '.\Illuminate\Support\Str::plural('training', $learning).' in progress' : 'Explore the GODRAM Virtual Academy' }}</span></span>
+                    <x-icon name="arrow-right" class="size-4" />
+                </a>
                 <a href="{{ route('stories.create') }}" class="mt-3 flex items-center gap-3 rounded-xl border border-line p-4 text-sm no-underline hover:border-ink-soft"><x-icon name="quote" class="size-5 text-poster" /><span><span class="block font-semibold text-ink">Share your story</span><span class="text-ink-soft">A testimony or a production you were part of</span></span></a>
             </div>
         </div>

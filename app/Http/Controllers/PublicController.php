@@ -65,14 +65,4 @@ class PublicController extends Controller
 
 
 
-    public function academy()
-    {
-        return view('public.coming', [
-            'title' => 'GODRAM Virtual Academy',
-            'eyebrow' => 'Learn. Practise. Be certified.',
-            'lead' => 'The digital home of GODRAM training: courses, live classes, examinations and verifiable certificates.',
-            'body' => 'The GODRAM Virtual Academy carries forward the work of the GODRAM Institute of Christian Drama, whose first class of 41 drama ministers graduated in 1995. It opens in a later phase of GODRAM CONNECT.',
-            'cta' => ['label' => 'Read the GODRAM story', 'url' => route('about')],
-        ]);
-    }
 }

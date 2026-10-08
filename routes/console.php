@@ -58,7 +58,7 @@ Artisan::command('godram:install {--national=GODRAM National}', function (Member
 })->purpose('Set up GODRAM CONNECT on a fresh database');
 
 Artisan::command('godram:clear-demo', function () {
-    if (! $this->confirm('Remove all demo members, reports, announcements, events, videos, stories and showcase items?')) {
+    if (! $this->confirm('Remove all demo members, reports, announcements, events, videos, stories, showcase items and Academy training?')) {
         return 1;
     }
     DB::transaction(function () {
@@ -72,6 +72,7 @@ Artisan::command('godram:clear-demo', function () {
         \App\Models\Video::where('is_demo', true)->delete();
         \App\Models\Event::where('is_demo', true)->delete();
         \App\Models\Production::where('is_demo', true)->delete();
+        \App\Models\Course::where('is_demo', true)->delete();
         $ids = Member::where('is_demo', true)->pluck('id');
         \App\Models\User::whereIn('member_id', $ids)->update(['is_active' => false, 'member_id' => null]);
         RoleAssignment::whereIn('member_id', $ids)->delete();

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityReport;
 use App\Models\Announcement;
+use App\Models\Course;
+use App\Models\Lesson;
 use App\Models\Event;
 use App\Models\Member;
 use App\Models\Production;
@@ -21,6 +23,7 @@ class SearchController extends Controller
 {
     public const SECTIONS = [
         'events' => 'Events',
+        'training' => 'Training',
         'videos' => 'Videos',
         'stories' => 'Stories',
         'showcase' => 'Showcase',
@@ -54,6 +57,15 @@ class SearchController extends Controller
                 $results['events'] = $match(Event::visibleTo($user), ['title', 'description', 'location'])
                     ->when($year, fn ($q) => $q->whereYear('starts_at', $year))->orderByDesc('starts_at')->limit(8)->get()
                     ->map(fn ($e) => $this->row($e->title, route('events.show', $e), $e->typeLabel().' · '.$e->starts_at->format('j M Y').' · '.$e->organiserName(), 'calendar'));
+            }
+            if ($want('training')) {
+                $visible = Course::visibleTo($user)->pluck('id');
+                $courses = $match(Course::whereIn('id', $visible), ['title', 'summary', 'description'])
+                    ->when($year, fn ($q) => $q->whereYear('published_at', $year))->with('orgUnit')->limit(6)->get()
+                    ->map(fn ($c) => $this->row($c->title, route('academy.show', $c), $c->levelLabel().' · '.$c->kindLabel(), 'academy'));
+                $lessons = $term === '' ? collect() : $match(Lesson::whereIn('course_id', $visible), ['title', 'summary', 'body'])->with('course')->limit(6)->get()
+                    ->map(fn ($l) => $this->row($l->title, route('academy.lesson', [$l->course, $l]), 'Lesson in '.$l->course->title, 'book'));
+                $results['training'] = $courses->merge($lessons)->values();
             }
             if ($want('videos')) {
                 $results['videos'] = $match(Video::published(), ['title', 'description'])

@@ -125,6 +125,7 @@ class DemoSeeder extends Seeder
         $this->reports($assemblies, $districts, $regions);
         $this->announcements($national, $districts);
         $this->call(MediaDemoSeeder::class);
+        $this->call(AcademyDemoSeeder::class);
     }
 
     protected function coordinator(string $roleKey, OrgUnit $scope, OrgUnit $assembly, string $email, ?string $first = null, ?string $last = null): User

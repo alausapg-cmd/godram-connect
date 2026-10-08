@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Academy\LearnController;
+use App\Http\Controllers\Academy\ManageController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
@@ -30,7 +32,6 @@ Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/archive', [PublicController::class, 'archive'])->name('archive');
 Route::get('/highlights', [PublicController::class, 'highlights'])->name('highlights');
 Route::get('/highlights/{report}', [PublicController::class, 'highlight'])->name('highlights.show');
-Route::get('/academy', [PublicController::class, 'academy'])->name('academy');
 Route::get('/network/{unit?}', [NetworkController::class, 'show'])->name('network');
 Route::get('/news', [AnnouncementController::class, 'index'])->name('announcements.index');
 Route::get('/news/{announcement}', [AnnouncementController::class, 'show'])->name('announcements.show');
@@ -146,6 +147,60 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::put('/stories/{story}', [StoryController::class, 'update'])->name('stories.update');
     Route::post('/stories/{story}/review', [StoryController::class, 'review'])->name('stories.review');
 
+    // GODRAM Virtual Academy: members
+    Route::get('/my-learning', [LearnController::class, 'mine'])->name('academy.mine');
+    Route::get('/academy/submissions/{submission}/file', [LearnController::class, 'submissionFile'])->name('academy.submission-file');
+
+    // GODRAM Virtual Academy: training administrators and facilitators
+    Route::prefix('academy/manage')->name('academy.manage.')->controller(ManageController::class)->scopeBindings()->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{course}', 'build')->name('build');
+        Route::get('/{course}/edit', 'edit')->name('edit');
+        Route::put('/{course}', 'update')->name('update');
+        Route::post('/{course}/status', 'status')->name('status');
+        Route::post('/{course}/sessions', 'storeSession')->name('sessions.store');
+        Route::put('/{course}/sessions/{session}', 'updateSession')->name('sessions.update');
+        Route::delete('/{course}/sessions/{session}', 'destroySession')->name('sessions.destroy');
+        Route::post('/{course}/sessions/{session}/move', 'moveSession')->name('sessions.move');
+        Route::post('/{course}/sessions/{session}/room', 'roomToggle')->name('sessions.room');
+        Route::post('/{course}/sessions/{session}/attendance', 'attendance')->name('sessions.attendance');
+        Route::get('/{course}/lessons/create', 'createLesson')->name('lessons.create');
+        Route::post('/{course}/lessons', 'storeLesson')->name('lessons.store');
+        Route::get('/{course}/lessons/{lesson}/edit', 'editLesson')->name('lessons.edit');
+        Route::put('/{course}/lessons/{lesson}', 'updateLesson')->name('lessons.update');
+        Route::delete('/{course}/lessons/{lesson}', 'destroyLesson')->name('lessons.destroy');
+        Route::post('/{course}/lessons/{lesson}/move', 'moveLesson')->name('lessons.move');
+        Route::post('/{course}/resources', 'storeResource')->name('resources.store');
+        Route::delete('/{course}/resources/{resource}', 'destroyResource')->name('resources.destroy');
+        Route::post('/{course}/prompts', 'storePrompt')->name('prompts.store');
+        Route::post('/{course}/prompts/{prompt}', 'updatePrompt')->name('prompts.update');
+        Route::post('/{course}/assignments', 'storeAssignment')->name('assignments.store');
+        Route::put('/{course}/assignments/{assignment}', 'updateAssignment')->name('assignments.update');
+        Route::delete('/{course}/assignments/{assignment}', 'destroyAssignment')->name('assignments.destroy');
+        Route::get('/{course}/submissions', 'submissions')->name('submissions');
+        Route::post('/{course}/submissions/{submission}', 'review')->name('submissions.review');
+        Route::get('/{course}/questions', 'questions')->name('questions');
+        Route::post('/{course}/questions/{question}', 'moderate')->name('questions.moderate');
+        Route::get('/{course}/people', 'people')->name('people');
+    });
+    Route::get('/academy/overview', [ManageController::class, 'overview'])->name('academy.overview');
+
+    Route::controller(LearnController::class)->prefix('academy/{course}')->name('academy.')->scopeBindings()->group(function () {
+        Route::post('/enrol', 'enrol')->name('enrol');
+        Route::delete('/enrol', 'withdraw')->name('withdraw');
+        Route::post('/lessons/{lesson}/complete', 'complete')->name('complete');
+        Route::get('/lessons/{lesson}/audio', 'audio')->name('audio');
+        Route::get('/resources/{resource}', 'resource')->name('resource');
+        Route::post('/prompts/{prompt}', 'respond')->name('respond');
+        Route::get('/live/{session}', 'room')->name('room');
+        Route::get('/live/{session}/feed', 'feed')->name('feed');
+        Route::post('/questions', 'ask')->middleware('throttle:20,1')->name('ask');
+        Route::get('/assignments/{assignment}', 'assignment')->name('assignment');
+        Route::post('/assignments/{assignment}', 'submit')->name('submit');
+    });
+
     // Administration
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/structure', [OrgUnitController::class, 'index'])->name('units.index');
@@ -170,3 +225,6 @@ Route::get('/showcase/{production}', [ShowcaseController::class, 'show'])->name(
 Route::get('/stories', [StoryController::class, 'index'])->name('stories');
 Route::get('/stories/{story}', [StoryController::class, 'show'])->name('stories.show');
 Route::get('/stories/{story}/audio', [StoryController::class, 'audio'])->name('stories.audio');
+Route::get('/academy', [LearnController::class, 'index'])->name('academy');
+Route::get('/academy/{course}', [LearnController::class, 'show'])->name('academy.show');
+Route::get('/academy/{course}/lessons/{lesson}', [LearnController::class, 'lesson'])->scopeBindings()->name('academy.lesson');

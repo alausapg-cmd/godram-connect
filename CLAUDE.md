@@ -10,6 +10,7 @@ Laravel 13 modular monolith (PHP 8.3+), Blade + Alpine.js + Tailwind v4, built w
 - Reports are reviewed by the level directly above (`Access::holdsAt` on the parent unit). Higher levels view and comment.
 - Every important change goes through `AuditLogger::log`, which chains entries with an HMAC. Do not update or delete `audit_logs` rows.
 - Uploaded images are re-encoded to WebP by `ImageStore` and served through permission-checked routes, never from a public folder.
+- Academy: who sees a course is `Course::visibleTo` (public flag, organising unit, targets, enrolment); teaching rights are `canTeach` (listed facilitator or `training.manage` over the unit). Attendance records only what we know: "joined" (opened the live room) or "attended" (confirmed by a facilitator).
 - Phone numbers are stored as +234 numbers; use `App\Support\Phone`.
 - Demo rows carry `is_demo`; `godram:clear-demo` removes them.
 

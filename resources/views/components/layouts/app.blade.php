@@ -8,11 +8,16 @@
         ['Announcements', 'announcements.manage', 'megaphone', can_do('announcements.create') || can_do('announcements.publish')],
         ['Videos', 'videos.manage', 'play', can_do('media.submit')],
         ['Stories', can_do('stories.review') ? 'stories.manage' : 'stories.mine', 'quote', true],
+        ['My learning', 'academy.mine', 'academy', (bool) $user?->member_id, 'academy.mine'],
+        ...(can_do('training.manage') || ($user?->member_id && \App\Models\CourseFacilitator::where('member_id', $user->member_id)->exists())
+            ? [['Training', 'academy.manage.index', 'list', true, 'academy.manage.*']]
+            : [['Training', 'academy.overview', 'list', can_do('training.view'), 'academy.overview']]),
         ['Transfers', 'transfers.index', 'transfer', can_do('members.transfer.approve') || can_do('members.transfer.request')],
         ['Structure', 'admin.units.index', 'network', can_do('org.manage')],
         ['Roles', 'admin.roles.index', 'shield', can_do('roles.manage')],
         ['Audit log', 'admin.audit.index', 'history', can_do('audit.view')],
     ], fn ($i) => $i[3]) : [];
+    $workspace = array_map(fn ($i) => [$i[0], $i[1], $i[2], $i[4] ?? explode('.', $i[1])[0].'*'], $workspace);
     $public = [
         ['Home', 'home'], ['About', 'about'], ['Watch', 'watch'], ['Events', 'events'], ['Stories', 'stories'],
         ['Showcase', 'showcase'], ['Academy', 'academy'], ['News', 'announcements.index'],
@@ -23,6 +28,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ? $title.' · ' : '' }}GODRAM CONNECT</title>
     <meta name="description" content="{{ $description ?? 'The digital home of the GOFAMINT Drama & Film Ministry: connect, report, create, train, watch and celebrate.' }}">
     <meta name="theme-color" content="#16120f">
@@ -76,8 +82,9 @@
     @if ($workspace)
         <nav class="border-t border-white/10 bg-stage-2" aria-label="Workspace">
             <div class="container-page flex gap-1 overflow-x-auto py-1.5 [scrollbar-width:none]">
-                @foreach ($workspace as [$label, $route, $icon])
-                    <a href="{{ route($route) }}" @class(['flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm no-underline', 'bg-gold text-stage font-semibold' => request()->routeIs(explode('.', $route)[0].'*') && ! request()->routeIs('announcements.index', 'announcements.show'), 'text-paper/80 hover:text-white' => ! (request()->routeIs(explode('.', $route)[0].'*') && ! request()->routeIs('announcements.index', 'announcements.show'))])>
+                @foreach ($workspace as [$label, $route, $icon, $match])
+                    @php $on = request()->routeIs($match) && ! request()->routeIs('announcements.index', 'announcements.show', 'academy', 'academy.show', 'academy.lesson'); @endphp
+                    <a href="{{ route($route) }}" @class(['flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm no-underline', 'bg-gold text-stage font-semibold' => $on, 'text-paper/80 hover:text-white' => ! $on])>
                         <x-icon :name="$icon" class="size-4" />{{ $label }}
                     </a>
                 @endforeach
@@ -142,7 +149,7 @@
                 <span><span class="block font-semibold">{{ $user->name }}</span><span class="block text-xs text-paper/70">{{ $user->primaryTitle() }}</span></span>
             </a>
             <div class="grid grid-cols-2 gap-2">
-                @foreach ($workspace as [$label, $route, $icon])
+                @foreach ($workspace as [$label, $route, $icon, $match])
                     <a href="{{ route($route) }}" class="card flex items-center gap-2 p-3 text-sm font-medium no-underline"><x-icon :name="$icon" class="size-5 text-poster" />{{ $label }}</a>
                 @endforeach
             </div>

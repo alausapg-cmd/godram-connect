@@ -14,6 +14,7 @@ return [
         'image_max_kb' => 8192,
         'document_max_kb' => 10240,
         'max_files_per_report' => 12,
+        'resource_max_kb' => 25600,
     ],
 
     // When true, a banner tells visitors the data is sample data.

@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
             'video' => \App\Models\Video::class,
             'production' => \App\Models\Production::class,
             'story' => \App\Models\Story::class,
+            'course' => \App\Models\Course::class,
         ]);
     }
 }
