@@ -9,13 +9,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: gd, pdo_sqlite, mbstring, intl
           coverage: none
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
@@ -30,13 +30,13 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: gd, mbstring, intl
           coverage: none
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
@@ -48,7 +48,7 @@ jobs:
           zip -qr dist/godram-connect.zip . \
             -x '.git/*' '.github/*' 'tests/*' 'dist/*' '.env' 'database/*.sqlite' 'storage/logs/*.log' \
                'storage/framework/sessions/*' 'storage/framework/views/*.php' 'storage/framework/cache/data/*'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: godram-connect-${{ github.sha }}
           path: dist/godram-connect.zip
