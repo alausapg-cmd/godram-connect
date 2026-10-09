@@ -30,10 +30,12 @@ class GodramNotice extends Notification implements ShouldQueue
     public function via(User $user): array
     {
         $channels = ['database'];
-        if (! $user->is_active || $user->member?->is_demo) {
+        if (! $user->is_active) {
             return $channels;
         }
-        if ($user->email && $user->wantsNotice($this->category, 'email', $this->important)) {
+        // Sample members have made-up addresses, so they are never emailed. Push still works for them,
+        // because it only reaches a phone someone deliberately switched on (as in the committee preview).
+        if ($user->email && ! $user->member?->is_demo && $user->wantsNotice($this->category, 'email', $this->important)) {
             $channels[] = 'mail';
         }
         if (app(WebPush::class)->enabled() && $user->wantsNotice($this->category, 'push', $this->important) && $user->pushSubscriptions()->exists()) {
