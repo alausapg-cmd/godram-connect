@@ -128,7 +128,7 @@ class MemberController extends Controller
         return view('members.show', [
             'member' => $member,
             'assembly' => $assembly,
-            'reports' => $member->reports()->counted()->latest('activity_date')->limit(10)->get(),
+            'reports' => $member->reports()->counted()->with('orgUnit')->latest('activity_date')->limit(10)->get(),
             'canEdit' => $assembly && $this->access->can($user, 'members.update', $assembly),
             'canTransfer' => $assembly && $this->access->can($user, 'members.transfer.request', $assembly),
         ]);

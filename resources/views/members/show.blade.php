@@ -41,10 +41,15 @@
                 <div class="card-pad">
                     <h2 class="h-section">Participation</h2>
                     @forelse ($reports as $r)
-                        <a href="{{ route('reports.show', $r) }}" class="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3 text-sm no-underline first-of-type:border-0">
+                        @php
+                            // Members can be named on reports they may not open; send them to the public highlight instead, or show no link.
+                            $url = can_do('reports.view', $r->orgUnit) || $r->created_by === auth()->id() ? route('reports.show', $r)
+                                : ($r->status === 'published' ? route('highlights.show', $r) : null);
+                        @endphp
+                        <{{ $url ? 'a' : 'div' }} @if ($url) href="{{ $url }}" @endif class="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3 text-sm no-underline first-of-type:border-0">
                             <span><span class="font-semibold text-ink">{{ $r->displayTitle() }}</span><span class="block text-xs text-ink-soft">{{ $r->typeLabel() }} · {{ $r->activity_date?->format('j M Y') }}</span></span>
-                            <x-icon name="chevron-right" class="size-4 text-ink-soft" />
-                        </a>
+                            @if ($url)<x-icon name="chevron-right" class="size-4 text-ink-soft" />@endif
+                        </{{ $url ? 'a' : 'div' }}>
                     @empty
                         <p class="mt-2 text-sm text-ink-soft">No approved activities yet. When an activity report names this member, it appears here.</p>
                     @endforelse

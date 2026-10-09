@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ActivityReport;
+use Illuminate\Http\UploadedFile;
 use Tests\Concerns\BuildsMinistry;
 use Tests\TestCase;
 
@@ -126,7 +127,7 @@ class ReportWorkflowTest extends TestCase
         // Upload is allowed while the report is editable, so return it first.
         $this->actingAs($this->users['lagos'])->post(route('reports.review', $report), ['decision' => 'reject', 'note' => 'Add a photo']);
 
-        $file = \Illuminate\Http\UploadedFile::fake()->image('stage.jpg', 1600, 1000);
+        $file = UploadedFile::fake()->image('stage.jpg', 1600, 1000);
         $this->actingAs($this->users['agege'])->post(route('report-media.store', $report), ['files' => [$file]])->assertRedirect();
         $media = $report->media()->firstOrFail();
         $this->assertStringEndsWith('.webp', $media->path);
@@ -135,5 +136,28 @@ class ReportWorkflowTest extends TestCase
         $this->get(route('report-media.show', $media))->assertForbidden();
         $this->actingAs($this->users['ibadan'])->get(route('report-media.show', $media))->assertForbidden();
         $this->actingAs($this->users['lagos'])->get(route('report-media.show', $media))->assertOk();
+    }
+
+    public function test_a_member_named_on_reports_only_gets_links_they_can_open(): void
+    {
+        $member = $this->person($this->agege, 'Tola', 'Member', password: 'secret-pass-1');
+        $make = fn (string $title, string $status) => ActivityReport::create([
+            'org_unit_id' => $this->agege->id, 'title' => $title, 'activity_type' => 'workshop', 'status' => $status,
+            'activity_date' => now()->subWeek()->toDateString(), 'created_by' => $this->users['agege']->id,
+        ]);
+        $published = $make('Acting workshop', 'published');
+        $approved = $make('Rehearsal weekend', 'approved');
+        foreach ([$published, $approved] as $report) {
+            $report->participants()->attach($member->id, ['role' => 'performer']);
+        }
+
+        $this->actingAs($member->user)->get(route('members.show', $member))->assertOk()
+            ->assertSee('Rehearsal weekend')
+            ->assertSee(route('highlights.show', $published))
+            ->assertDontSee(route('reports.show', $published))
+            ->assertDontSee(route('reports.show', $approved));
+
+        $this->actingAs($this->users['agege'])->get(route('members.show', $member))->assertOk()
+            ->assertSee(route('reports.show', $approved));
     }
 }
