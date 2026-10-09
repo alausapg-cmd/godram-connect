@@ -1,7 +1,7 @@
 // GODRAM Connect service worker: keeps the app shell and the offline page
 // available, caches built assets and archive images, never caches private pages.
-const VERSION = 'godram-v1';
-const SHELL = ['/offline', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon.svg'];
+const VERSION = 'godram-v2';
+const SHELL = ['/offline', '/manifest.webmanifest', '/icons/icon-192.png', '/images/godram-logo.webp'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(VERSION).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));

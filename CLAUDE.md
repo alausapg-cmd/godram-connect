@@ -14,7 +14,7 @@ Laravel 13 modular monolith (PHP 8.3+), Blade + Alpine.js + Tailwind v4, built w
 - Examinations: `App\Services\Cbt` builds each paper from the exam's blueprint, keeps the clock (deadline on the attempt, checked on every save) and marks on the server. Each paper stores a snapshot of its questions, so editing the bank never changes a past result; answer keys are only sent after results are released. Saves carry a revision number so late retries never overwrite newer answers.
 - Certificates come only from a rule (`Certificates::forExam`, an achievement rule, or a special recognition with a written reason), and are checked publicly at `/verify/{number}` with limited details.
 - Phone numbers are stored as +234 numbers; use `App\Support\Phone`.
-- Brand: the official GODRAM emblem (`public/images/godram-logo.svg` and `.png`, set in `config/godram.php` under `logo`) is the only logo used anywhere: header, sign-in, exam screen, app icons, share image and every certificate. Use `<x-logo>` in views; never draw a stand-in mark.
+- Brand: the official GODRAM logo supplied by the ministry (`public/images/godram-logo.webp` for pages, `.png` for PDFs, set in `config/godram.php` under `logo`) is the only logo used anywhere: header, sign-in, exam screen, app icons, share image and every certificate. Use `<x-logo>` in views. Never redraw, simplify or recreate it.
 - Demo rows carry `is_demo`; `godram:clear-demo` removes them.
 
 ## Commands

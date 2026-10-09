@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex">
     <title>{{ $title }} · GODRAM CONNECT</title>
     <meta name="theme-color" content="#16120f">
-    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/icons/icon-192.png" type="image/png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-paper">

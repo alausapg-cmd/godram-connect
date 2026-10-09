@@ -44,7 +44,7 @@
     <meta property="og:image" content="{{ $image ?? asset('images/share-default.png') }}">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/icons/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -58,9 +58,9 @@
 <header class="bg-stage text-paper">
     <div class="container-page flex h-16 items-center justify-between gap-4">
         <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5 no-underline" aria-label="GODRAM CONNECT home">
-            <x-logo class="size-12" alt="" />
+            <x-logo class="size-11 sm:size-12" alt="" />
             <span class="font-display text-2xl font-bold uppercase leading-none tracking-wide text-paper">Godram</span>
-            <span class="mt-1 font-display text-xs font-medium uppercase leading-none tracking-[0.3em] text-gold">Connect</span>
+            <span class="mt-1 hidden font-display text-xs font-medium uppercase leading-none tracking-[0.3em] text-gold min-[400px]:inline">Connect</span>
         </a>
         <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">
             @foreach ($public as [$label, $route])
