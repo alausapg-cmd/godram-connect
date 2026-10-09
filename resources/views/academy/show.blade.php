@@ -206,6 +206,12 @@
                     </div>
                 @endif
             </div>
+            @if ($canTeach && $course->status === 'published')
+                @php $courseUrl = route('academy.show', $course); @endphp
+                <x-share-kit class="mt-4" :url="$courseUrl" filename="godram-training.png"
+                    :image="$course->is_public ? route('share.card', ['course', $course->slug]) : null"
+                    :message="'*'.$course->title.'*'.PHP_EOL.'GODRAM Virtual Academy · '.$course->kindLabel().PHP_EOL.PHP_EOL.\Illuminate\Support\Str::limit((string) $course->summary, 200).($course->enrol_by ? PHP_EOL.'Enrol by '.$course->enrol_by->format('l j F').'.' : '').PHP_EOL.PHP_EOL.'Enrol here: '.$courseUrl" />
+            @endif
         </aside>
     </section>
 </x-layouts.app>

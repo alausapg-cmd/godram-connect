@@ -22,6 +22,7 @@
         ['Structure', 'admin.units.index', 'network', can_do('org.manage')],
         ['Roles', 'admin.roles.index', 'shield', can_do('roles.manage')],
         ['Audit log', 'admin.audit.index', 'history', can_do('audit.view')],
+        ['Integrations', 'admin.integrations', 'link', can_do('settings.manage') || can_do('media.manage'), 'admin.integrations'],
     ], fn ($i) => $i[3]) : [];
     $workspace = array_map(fn ($i) => [$i[0], $i[1], $i[2], $i[4] ?? explode('.', $i[1])[0].'*'], $workspace);
     $public = [

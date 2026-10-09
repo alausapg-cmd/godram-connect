@@ -17,7 +17,7 @@ class ShareCard
 
     public function render(string $key, string $eyebrow, string $title, ?string $subtitle, ?string $coverFile): string
     {
-        $path = 'share-cards/'.sha1($key.'|'.$eyebrow.'|'.$title.'|'.$subtitle).'.png';
+        $path = 'share-cards/'.sha1('v2|'.$key.'|'.$eyebrow.'|'.$title.'|'.$subtitle).'.png';
         $disk = Storage::disk('local');
         if ($disk->exists($path)) {
             return $disk->path($path);
@@ -65,8 +65,17 @@ class ShareCard
                     imagettftext($img, 22, 0, 64, $y + 56 + $i * 34, $soft, $body, $line);
                 }
             }
-            imagettftext($img, 26, 0, 64, self::H - 56, $paper, $display, 'GODRAM');
-            imagettftext($img, 15, 0, 196, self::H - 58, $gold, $body, 'C O N N E C T');
+            // The official GODRAM logo, as supplied, beside the name.
+            $logoFile = public_path(config('godram.logo.png'));
+            $left = 64;
+            if (is_file($logoFile) && ($logo = @imagecreatefrompng($logoFile))) {
+                imagealphablending($img, true);
+                imagecopyresampled($img, $logo, 56, self::H - 118, 0, 0, 84, 84, imagesx($logo), imagesy($logo));
+                imagedestroy($logo);
+                $left = 152;
+            }
+            imagettftext($img, 26, 0, $left, self::H - 56, $paper, $display, 'GODRAM');
+            imagettftext($img, 15, 0, $left + 132, self::H - 58, $gold, $body, 'C O N N E C T');
         } else {
             imagestring($img, 5, 64, 80, $title, $paper);
         }

@@ -75,12 +75,13 @@ MAIL_FROM_ADDRESS=no-reply@yourdomain.org
 GODRAM_DEMO_MODE=false
 ```
 
-Create the `no-reply@` mailbox in DirectAdmin **E-Mail Accounts** first; it sends password reset links.
+Create the `no-reply@` mailbox in DirectAdmin **E-Mail Accounts** first; it sends password reset links and the notices members choose to get by email. Shared hosting limits how many emails an account may send each hour (ask WhoGoHost for your figure). Emails wait in a queue and go out a few at a time, so a large announcement is spread over several minutes rather than refused.
 
 Then run (use the PHP 8.3 binary if `php -v` shows an older version, for example `/usr/local/php83/bin/php`):
 
 ```bash
 php artisan key:generate
+php artisan godram:push-keys      # phone and browser notifications; run once only
 php artisan migrate --seed --force
 php artisan config:cache
 php artisan route:cache
@@ -122,7 +123,13 @@ The schedule includes:
 
 - an hourly import of new GODRAM TV uploads into the Watch centre (to fill it straight away, run `php artisan godram:sync-youtube` once);
 - every minute, submitting examination attempts whose time ran out while the candidate was offline;
-- every night, checking members against the achievement rules.
+- every night, checking members against the achievement rules;
+- every 15 minutes, reminders: events tomorrow and within the hour, livestreams about to start, live Academy classes, assignments due, examinations opening and closing, and on the 25th of each month a nudge to Assemblies with no report yet;
+- every minute, sending the emails and phone notifications waiting in the queue (a short worker that stops when the queue is empty, so nothing keeps running on the shared server).
+
+In-app notices appear straight away. Email and phone notifications follow within a minute of the cron job. **Administration → Integrations** shows how many are waiting and whether any failed. If the cron job is not set up, set `NOTIFY_QUEUE=sync` in `.env` to send at once instead (slower pages when an announcement goes to many people).
+
+Phone notifications use the standard Web Push protocol: no outside account or fee. They work on Android phones and computers straight away; on iPhone, members first add GODRAM CONNECT to the Home Screen. `godram:push-keys` must not be re-run later: new keys switch notifications off on every phone until members turn them on again.
 
 The examination timer itself never depends on cron: the server checks the deadline on every answer it receives. Cron only tidies up papers whose candidate never came back.
 
@@ -151,4 +158,6 @@ php artisan up
 
 - `https://connect.yourdomain.org/up` returns a green page.
 - `php artisan audit:verify` confirms nobody has altered the audit log.
+- **Administration → Integrations** shows email, phone notification and queue status.
+- `php artisan queue:retry all` resends notices that failed (for example while the mail server was down).
 - Errors are written to `~/godram-connect/storage/logs/laravel.log`.

@@ -43,9 +43,10 @@ class AnalyticsController extends Controller
                 'recognition' => ['certificates' => 'Certificates issued', 'achievements' => 'Achievements awarded'],
                 'media' => ['videos' => 'Videos added (national)', 'stories' => 'Stories published (national)', 'streams' => 'Livestreamed events'],
             ];
+            $areas = ['membership' => 'Membership', 'reporting' => 'Reporting', 'training' => 'Training', 'cbt' => 'Examinations', 'events' => 'Events', 'recognition' => 'Recognition', 'media' => 'Media'];
             foreach ($labels as $area => $measures) {
                 foreach ($measures as $key => $label) {
-                    fputcsv($out, [ucfirst($area), $label, $data[$area][$key] ?? '']);
+                    fputcsv($out, [$areas[$area], $label, $data[$area][$key] ?? '']);
                 }
             }
             if ($data['children']) {

@@ -15,6 +15,9 @@ Laravel 13 modular monolith (PHP 8.3+), Blade + Alpine.js + Tailwind v4, built w
 - Certificates come only from a rule (`Certificates::forExam`, an achievement rule, or a special recognition with a written reason), and are checked publicly at `/verify/{number}` with limited details.
 - Phone numbers are stored as +234 numbers; use `App\Support\Phone`.
 - Brand: the official GODRAM logo supplied by the ministry (`public/images/godram-logo.webp` for pages, `.png` for PDFs, set in `config/godram.php` under `logo`) is the only logo used anywhere: header, sign-in, exam screen, app icons, share image and every certificate. Use `<x-logo>` in views. Never redraw, simplify or recreate it.
+- Notifications: actions reach people through the audit log. `AuditLogger::log` hands actions listed in `Notify::ROUTED` to `Notify::fromAudit`, which picks the audience and sends a `GodramNotice` (in-app always; email and push per the person's choices in `config/notifications.php`; locked categories and `important` notices always go). Time-based notices live in `App\Services\Reminders` and use `Notify::once` keys so cron never sends twice. Email and push wait in the database queue (`NOTIFY_QUEUE`), worked by cron.
+- Sharing: WhatsApp, Instagram and TikTok cannot be posted to by us, so use `<x-share-kit>` (Create, Preview, Share). Never describe an integration as automatic unless it is; `Admin\IntegrationController` states each one honestly.
+- Analytics (`App\Services\Analytics`) counts only from our own records, scoped by `analytics.view`. Video views are YouTube's and are not shown.
 - Demo rows carry `is_demo`; `godram:clear-demo` removes them.
 
 ## Commands

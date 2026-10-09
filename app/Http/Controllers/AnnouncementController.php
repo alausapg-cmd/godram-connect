@@ -37,7 +37,7 @@ class AnnouncementController extends Controller
             && Announcement::whereKey($announcement->id)->live()->visibleTo($user)->exists();
         abort_unless($visible || $this->canManage($user, $announcement), 404);
 
-        return view('announcements.show', ['announcement' => $announcement->load('targets.orgUnit', 'author')]);
+        return view('announcements.show', ['announcement' => $announcement->load('targets.orgUnit', 'author'), 'canManage' => $this->canManage($user, $announcement)]);
     }
 
     public function image(Request $request, Announcement $announcement)

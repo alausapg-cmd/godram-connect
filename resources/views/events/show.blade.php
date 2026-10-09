@@ -130,6 +130,14 @@
                         </details>
                     @endunless
                 </div>
+                @unless ($event->isCancelled() || $event->isPast())
+                    @php
+                        $where = $event->is_online ? 'Online'.($event->platformLabel() ? ' on '.$event->platformLabel() : '') : $event->location;
+                        $invite = '*'.$event->title.'*'.PHP_EOL.'🗓 '.$event->starts_at->format('l j F Y, g:ia').PHP_EOL.'📍 '.$where.PHP_EOL.PHP_EOL.\Illuminate\Support\Str::limit((string) $event->description, 200).PHP_EOL.PHP_EOL.($event->registration_open ? 'Register here: ' : 'Details: ').$shareUrl;
+                    @endphp
+                    <x-share-kit :url="$shareUrl" :message="$invite" filename="godram-event.png"
+                        :image="$event->visibility === 'public' ? route('share.card', ['event', $event->slug]) : null" />
+                @endunless
             @endif
 
             @if ($event->production)

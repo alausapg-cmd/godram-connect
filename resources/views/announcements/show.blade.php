@@ -1,4 +1,4 @@
-<x-layouts.app :title="$announcement->title" :description="\Illuminate\Support\Str::limit($announcement->body, 150)">
+<x-layouts.app :title="$announcement->title" :description="\Illuminate\Support\Str::limit($announcement->body, 150)" :image="$announcement->status === 'published' && $announcement->isPublic() ? route('share.card', ['announcement', $announcement->id]) : null">
     <article class="container-page mt-10 max-w-3xl">
         <a href="{{ route('announcements.index') }}" class="text-sm font-semibold text-curtain">All news</a>
         @if ($announcement->status !== 'published')
@@ -12,11 +12,12 @@
             <a href="{{ $announcement->link_url }}" class="btn-primary mt-6 no-underline" target="_blank" rel="noopener">{{ $announcement->cta_label ?? 'Learn more' }} <x-icon name="arrow-right" class="size-4" /></a>
         @endif
         @php $url = route('announcements.show', $announcement); @endphp
-        @if ($announcement->isPublic())
-            <div class="mt-8 flex flex-wrap gap-2 border-t border-line pt-6">
-                <a class="btn-ghost btn-sm no-underline" href="https://wa.me/?text={{ urlencode($announcement->title.' - '.$url) }}" target="_blank" rel="noopener">Share on WhatsApp</a>
-                <a class="btn-ghost btn-sm no-underline" href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($url) }}" target="_blank" rel="noopener">Share on Facebook</a>
-            </div>
+        @if ($announcement->status === 'published' && $canManage)
+            <x-share-kit class="mt-8" :url="$url" filename="godram-announcement.png"
+                :image="$announcement->isPublic() ? route('share.card', ['announcement', $announcement->id]) : null"
+                :message="'*'.$announcement->title.'*'.PHP_EOL.PHP_EOL.\Illuminate\Support\Str::limit($announcement->body, 300).PHP_EOL.PHP_EOL.'Read more on GODRAM CONNECT: '.$url" />
+        @elseif ($announcement->isPublic())
+            <x-share class="mt-8 border-t border-line pt-6" :url="$url" :title="$announcement->title" />
         @endif
     </article>
 </x-layouts.app>

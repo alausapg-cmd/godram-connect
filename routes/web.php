@@ -4,6 +4,7 @@ use App\Http\Controllers\Academy\LearnController;
 use App\Http\Controllers\Academy\ManageController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
 use App\Http\Controllers\AnnouncementController;
@@ -285,6 +286,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/roles', [RoleAssignmentController::class, 'store'])->name('roles.store');
         Route::post('/roles/{assignment}/end', [RoleAssignmentController::class, 'end'])->name('roles.end');
         Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
+        Route::get('/integrations', [IntegrationController::class, 'index'])->name('integrations');
     });
 });
 

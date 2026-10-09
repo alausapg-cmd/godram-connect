@@ -36,6 +36,8 @@ class CoverController extends Controller
             'story' => Story::published()->where('slug', $slug)->firstOrFail(),
             'showcase' => Production::published()->where('slug', $slug)->firstOrFail(),
             'video' => \App\Models\Video::published()->where('slug', $slug)->firstOrFail(),
+            'course' => \App\Models\Course::published()->where('is_public', true)->where('slug', $slug)->firstOrFail(),
+            'announcement' => \App\Models\Announcement::live()->public()->whereKey((int) $slug)->firstOrFail(),
             default => abort(404),
         };
 
@@ -44,6 +46,8 @@ class CoverController extends Controller
             'story' => ['GODRAM Stories · '.$item->typeLabel(), $item->standfirst, $item->coverFile()],
             'showcase' => ['Creative Showcase · '.$item->kindLabel(), $item->summary, $item->coverFile()],
             'video' => ['Watch on GODRAM TV · '.$item->categoryLabel(), null, null],
+            'course' => ['GODRAM Virtual Academy · '.$item->kindLabel(), $item->enrol_by ? 'Enrol by '.$item->enrol_by->format('j F Y') : $item->orgUnit?->fullName(), $item->coverFile()],
+            'announcement' => ['GODRAM announcement · '.$item->published_at->format('j M Y'), \Illuminate\Support\Str::limit($item->body, 90), $item->image_path ? Storage::disk('local')->path($item->image_path) : null],
         };
 
         $file = $cards->render($type.':'.$item->id.':'.$item->updated_at?->timestamp, $eyebrow, $item->title, $subtitle, $cover);
