@@ -14,12 +14,20 @@ class HeroTest extends TestCase
         $all = collect(config('heroes'))->flatten();
 
         $this->assertSame($all->count(), $all->unique()->count());
-        $all->each(fn ($file) => $this->assertFileExists(public_path('images/archive/'.$file)));
+        $all->each(fn ($file) => $this->assertFileExists(public_path('images/'.$file)));
+    }
+
+    public function test_every_header_picture_has_a_caption(): void
+    {
+        $known = collect(config('archive'))->map(fn ($a) => 'archive/'.$a['file'])
+            ->merge(collect(config('gallery'))->map(fn ($g) => 'gallery/'.$g['file']));
+
+        collect(config('heroes'))->flatten()->each(fn ($path) => $this->assertContains($path, $known));
     }
 
     public function test_page_headers_show_their_own_carousel(): void
     {
-        $this->get('/')->assertOk()->assertSee('x-data="carousel(6)"', false)->assertSee('images/archive/godram-13.webp', false);
-        $this->get('/login')->assertOk()->assertSee('images/archive/godram-24.webp', false)->assertDontSee('images/archive/godram-13.webp', false);
+        $this->get('/')->assertOk()->assertSee('x-data="carousel(6)"', false)->assertSee('images/gallery/convention-2026-5878.webp', false);
+        $this->get('/login')->assertOk()->assertSee('images/gallery/convention-2026-5914.webp', false)->assertDontSee('images/gallery/convention-2026-5878.webp', false);
     }
 }

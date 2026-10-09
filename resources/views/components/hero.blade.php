@@ -2,12 +2,15 @@
 @php
     // A page header with a slow image carousel behind it. Pictures come from
     // config/heroes.php; photos fill the frame, posters and papers stand to the right.
-    $archive = collect(config('archive'))->keyBy('file');
-    $slides = collect(config("heroes.$page", []))->map(fn ($file) => [
-        'src' => asset('images/archive/'.$file),
-        'photo' => ($archive[$file]['kind'] ?? 'photo') === 'photo',
-        'label' => ($t = $archive[$file]['title'] ?? '').(isset($archive[$file]['year']) && ! str_contains($t, (string) $archive[$file]['year']) ? ', '.$archive[$file]['year'] : ''),
-    ])->values();
+    $known = collect(config('archive'))->mapWithKeys(fn ($a) => ['archive/'.$a['file'] => $a])
+        ->merge(collect(config('gallery'))->mapWithKeys(fn ($g) => ['gallery/'.$g['file'] => $g + ['kind' => 'photo']]));
+    $slides = collect(config("heroes.$page", []))->map(function ($path) use ($known) {
+        $item = $known[$path] ?? [];
+        $label = $item['title'] ?? '';
+        if (! empty($item['year']) && ! str_contains($label, (string) $item['year'])) $label .= ', '.$item['year'];
+
+        return ['src' => asset('images/'.$path), 'photo' => ($item['kind'] ?? 'photo') === 'photo', 'label' => $label, 'from' => str_starts_with($path, 'archive/') ? 'From the archive' : 'GODRAM in action'];
+    })->values();
     $height = ['lg' => 'min-h-[34rem] sm:min-h-[40rem]', 'md' => 'min-h-[26rem] sm:min-h-[30rem]', 'sm' => 'min-h-[20rem] sm:min-h-[22rem]', 'full' => 'min-h-[calc(100vh-4rem)]'][$size];
 @endphp
 <section {{ $attributes->merge(['class' => "hero relative isolate flex overflow-hidden bg-stage text-paper $height"]) }}
@@ -55,7 +58,7 @@
             </div>
             <div class="flex min-w-0 items-center gap-3">
                 <p class="hidden truncate text-xs text-paper/70 sm:block" aria-live="polite">
-                    @foreach ($slides as $n => $slide)<span x-show="i === {{ $n }}" @if ($n) x-cloak @endif>From the archive · {{ $slide['label'] }}</span>@endforeach
+                    @foreach ($slides as $n => $slide)<span x-show="i === {{ $n }}" @if ($n) x-cloak @endif>{{ $slide['from'] }} · {{ $slide['label'] }}</span>@endforeach
                 </p>
                 <button type="button" class="hidden rounded-full border border-paper/25 p-2 text-paper/85 hover:bg-white/10 sm:block" @click="choose(i - 1)" aria-label="Previous picture"><x-icon name="chevron-left" class="size-4" /></button>
                 <button type="button" class="hidden rounded-full border border-paper/25 p-2 text-paper/85 hover:bg-white/10 sm:block" @click="choose(i + 1)" aria-label="Next picture"><x-icon name="chevron-right" class="size-4" /></button>

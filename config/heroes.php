@@ -1,14 +1,15 @@
 <?php
 
-// Pictures for the carousel at the top of each main page, drawn from
-// public/images/archive. Each picture is used on one page only, so no two
-// headers repeat a picture. Captions come from config/archive.php.
+// Pictures for the carousel at the top of each main page, as paths under
+// public/images. Each picture is used on one page only, so no two headers
+// repeat a picture (a test checks this). Captions come from config/gallery.php
+// and config/archive.php.
 return [
-    'home' => ['godram-13.webp', 'godram-2.webp', 'godram-11.webp', 'godram-21.webp', 'godram-12.webp', 'godram-14.webp'],
-    'about' => ['godram-10.webp', 'godram-1.webp', 'godram-15.webp', 'godram-25.webp', 'godram-9.webp'],
-    'events' => ['godram-29.webp', 'godram-8.webp', 'godram-34.webp', 'godram-17.webp', 'godram-20.webp', 'godram-16.webp'],
-    'academy' => ['godram-31.webp', 'godram-22.webp', 'godram-23.webp', 'godram-18.webp', 'godram-19.webp'],
-    'network' => ['godram-35.webp', 'godram-28.webp'],
-    'coming' => ['godram-30.webp', 'godram-32.webp'],
-    'auth' => ['godram-24.webp', 'godram-27.webp', 'godram-26.webp'],
+    'home' => ['gallery/convention-2026-5878.webp', 'gallery/convention-2026-5832.webp', 'gallery/convention-2026-5923.webp', 'gallery/outreach-4731.webp', 'gallery/convention-2026-5887.webp', 'gallery/convention-2026-5944.webp'],
+    'about' => ['gallery/stage-drama-4415.webp', 'gallery/stage-drama-05131.webp', 'archive/godram-13.webp', 'gallery/convention-2026-5911.webp', 'archive/godram-2.webp', 'archive/godram-10.webp'],
+    'events' => ['gallery/convention-2026-5929.webp', 'gallery/outreach-4786.webp', 'gallery/convention-2026-5899.webp', 'gallery/outreach-4802.webp', 'gallery/convention-2026-5807.webp', 'gallery/outreach-4819.webp'],
+    'academy' => ['gallery/osun-conference-5706.webp', 'gallery/osun-conference-5700.webp', 'gallery/osun-conference-5716.webp', 'gallery/osun-conference-5683.webp', 'archive/godram-31.webp'],
+    'network' => ['gallery/convention-2026-5938.webp', 'gallery/outreach-4817.webp', 'gallery/osun-conference-5709.webp', 'gallery/convention-2026-5947.webp'],
+    'coming' => ['gallery/convention-2026-5884.webp', 'gallery/convention-2026-5905.webp', 'gallery/stage-drama-05102.webp'],
+    'auth' => ['gallery/convention-2026-5914.webp', 'gallery/convention-2026-5826.webp', 'gallery/convention-2026-5857.webp', 'gallery/osun-conference-5726.webp'],
 ];
