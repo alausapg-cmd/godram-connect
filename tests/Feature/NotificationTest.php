@@ -131,6 +131,12 @@ class NotificationTest extends TestCase
         $other = $mushin->notifications()->where('data->title', 'Sneaky link')->first();
         $this->actingAs($mushin)->get(route('notifications.open', $other->id))->assertRedirect(route('notifications.index'));
 
+        // A notice made by cron with the configured address still opens on the address in use.
+        $host = parse_url(config('app.url'), PHP_URL_HOST);
+        $mushin->notify(new GodramNotice('events', 'From cron', 'Text.', 'http://www.'.$host.'/events?tab=past'));
+        $cron = $mushin->notifications()->where('data->title', 'From cron')->first();
+        $this->actingAs($mushin)->get(route('notifications.open', $cron->id))->assertRedirect(url('/events?tab=past'));
+
         // Nobody can open someone else's notice.
         $this->actingAs($this->users['agege'])->get(route('notifications.open', $first->id))->assertNotFound();
 

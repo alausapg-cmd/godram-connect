@@ -25,9 +25,28 @@ class NotificationController extends Controller
     {
         $notice = $request->user()->notifications()->findOrFail($id);
         $notice->markAsRead();
-        $url = $notice->data['url'] ?? null;
 
-        return redirect()->to($url && str_starts_with($url, url('/')) ? $url : route('notifications.index'));
+        return redirect()->to($this->sameSite($notice->data['url'] ?? null) ?? route('notifications.index'));
+    }
+
+    /**
+     * Notices made by cron carry the configured address (APP_URL), which may differ from
+     * the one being browsed (http or https, with or without www). Only our own hosts are
+     * accepted, and the person stays on the address they are using.
+     */
+    protected function sameSite(?string $url): ?string
+    {
+        $parts = $url ? parse_url($url) : false;
+        if (! $parts || ! isset($parts['host'])) {
+            return null;
+        }
+        $ours = array_filter([request()->getHost(), parse_url((string) config('app.url'), PHP_URL_HOST)]);
+        $bare = fn ($host) => preg_replace('/^www\./', '', strtolower($host));
+        if (! in_array($bare($parts['host']), array_map($bare, $ours), true)) {
+            return null;
+        }
+
+        return url(($parts['path'] ?? '/').(isset($parts['query']) ? '?'.$parts['query'] : '').(isset($parts['fragment']) ? '#'.$parts['fragment'] : ''));
     }
 
     public function readAll(Request $request)
