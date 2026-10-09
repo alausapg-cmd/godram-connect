@@ -27,7 +27,7 @@ class HeroTest extends TestCase
 
     public function test_page_headers_show_their_own_carousel(): void
     {
-        $this->get('/')->assertOk()->assertSee('x-data="carousel(6)"', false)->assertSee('images/gallery/convention-2026-5878.webp', false);
+        $this->get('/')->assertOk()->assertSee('x-data="carousel(16)"', false)->assertSee('images/gallery/convention-2026-5878.webp', false);
         $this->get('/login')->assertOk()->assertSee('images/gallery/convention-2026-5914.webp', false)->assertDontSee('images/gallery/convention-2026-5878.webp', false);
     }
 }

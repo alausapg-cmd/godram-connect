@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SitePicture;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,8 +19,8 @@ class ProductionImage extends Model
 
     public function url(): string
     {
-        return str_starts_with($this->path, 'archive:')
-            ? asset('images/archive/'.substr($this->path, 8))
+        return SitePicture::is($this->path)
+            ? SitePicture::url($this->path)
             : route('covers.show', [self::COVER_TYPE, $this->id]);
     }
 }

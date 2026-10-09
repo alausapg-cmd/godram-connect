@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\AssignmentSubmission;
 use App\Models\Course;
-use App\Models\CourseSession;
 use App\Models\Enrolment;
 use App\Models\LessonProgress;
 use App\Models\Member;
@@ -123,7 +122,7 @@ class AcademyDemoSeeder extends Seeder
             'title' => 'Foundations of Drama Ministry',
             'kind' => 'blended',
             'org_unit_id' => $national->id,
-            'cover_path' => 'archive:godram-12.webp',
+            'cover_path' => 'gallery:stage-drama-4417.webp',
             'summary' => 'The calling, character and craft of a GODRAM drama minister, from the rehearsal room to the market square.',
             'description' => "This is the starting point for every GODRAM drama minister. It covers why God uses drama, the life of the person on stage, building a character truthfully and taking a short sketch to the street.\n\nThe course mixes readings you can do on your phone with two live classes and two practical assignments. (Sample course for the preview: the National office will replace it with its own curriculum.)",
             'outcomes' => "Explain why drama is a tool for ministry, from Scripture\nPrepare spiritually and practically before a ministration\nBuild a believable character without losing the message\nPlan and rehearse a ten-minute outreach sketch",
@@ -220,7 +219,7 @@ class AcademyDemoSeeder extends Seeder
         ]);
         $course->assignments()->create([
             'title' => 'Record a one-minute monologue',
-            'brief' => "Record yourself performing a one-minute monologue from the character you built in Session 2. Upload it to YouTube as **unlisted** or to Google Drive and paste the link.",
+            'brief' => 'Record yourself performing a one-minute monologue from the character you built in Session 2. Upload it to YouTube as **unlisted** or to Google Drive and paste the link.',
             'accepts' => ['link'], 'due_at' => now()->addDays(17)->setTime(23, 59), 'max_score' => 10,
             'course_session_id' => $sessions[1]->id, 'sort' => 1,
         ]);
@@ -232,7 +231,7 @@ class AcademyDemoSeeder extends Seeder
     {
         $course = $this->course([
             'title' => 'Scriptwriting for Evangelism',
-            'kind' => 'recorded', 'org_unit_id' => $region->id, 'cover_path' => 'archive:godram-35.webp',
+            'kind' => 'recorded', 'org_unit_id' => $region->id, 'cover_path' => 'gallery:osun-conference-5712.webp',
             'summary' => 'Write short scripts that hold a crowd and point clearly to Christ. Self-paced, for members in Region 1.',
             'outcomes' => "Turn a Bible truth into a story\nWrite dialogue people believe\nFormat a script your team can rehearse from",
             'is_public' => true,
@@ -244,13 +243,13 @@ class AcademyDemoSeeder extends Seeder
                     'body' => "A short script can carry one truth well. Write it in a single sentence before you write anything else: *God's grace is greater than my past.* Every scene must serve that sentence.",
                     'key_points' => "One script, one truth\nWrite the truth in one sentence first"],
                 ['title' => 'Characters people recognise', 'kind' => 'text', 'minutes' => 7,
-                    'body' => "Write characters your audience meets every day: the conductor, the trader, the student. Give each one a want and a fear."],
+                    'body' => 'Write characters your audience meets every day: the conductor, the trader, the student. Give each one a want and a fear.'],
             ]],
             ['title' => 'Writing and formatting', 'lessons' => [
                 ['title' => 'Dialogue that sounds real', 'kind' => 'text', 'minutes' => 8,
-                    'body' => "Read your lines aloud. Cut any line nobody would really say. Let characters interrupt each other. Use the language of your audience, including Yoruba, Pidgin or Hausa where it fits."],
+                    'body' => 'Read your lines aloud. Cut any line nobody would really say. Let characters interrupt each other. Use the language of your audience, including Yoruba, Pidgin or Hausa where it fits.'],
                 ['title' => 'Laying out a script', 'kind' => 'document', 'minutes' => 5,
-                    'body' => "Character names in capitals, stage directions in brackets, a new line for every speech. Number the scenes. Put the cast list and the props list on the first page."],
+                    'body' => 'Character names in capitals, stage directions in brackets, a new line for every speech. Number the scenes. Put the cast list and the props list on the first page.'],
             ]],
         ]);
         $course->assignments()->create(['title' => 'Write your one-sentence truth and first scene', 'brief' => 'Share the one sentence your script will carry, then the first scene.', 'accepts' => ['text', 'file'], 'sort' => 0]);
@@ -260,7 +259,7 @@ class AcademyDemoSeeder extends Seeder
     {
         $course = $this->course([
             'title' => 'Acting Fundamentals Workshop',
-            'kind' => 'live', 'org_unit_id' => $district->id, 'cover_path' => 'archive:godram-13.webp',
+            'kind' => 'live', 'org_unit_id' => $district->id, 'cover_path' => 'gallery:convention-2026-5814.webp',
             'summary' => 'A practical evening workshop for every drama team in Agege District: movement, voice and stage presence.',
             'starts_on' => now()->addDays(12)->toDateString(), 'enrol_by' => now()->addDays(10)->toDateString(),
             'is_public' => false,
@@ -269,7 +268,7 @@ class AcademyDemoSeeder extends Seeder
             ['title' => 'Movement, voice and presence', 'summary' => 'Bring comfortable clothes and water.',
                 'live_at' => now()->addDays(12)->setTime(10, 0), 'live_platform' => 'meet', 'live_url' => 'https://meet.google.com/',
                 'lessons' => [['title' => 'Before the workshop: warm-up routine', 'kind' => 'text', 'minutes' => 4,
-                    'body' => "Practise this five-minute warm-up before you come: shoulder rolls, jaw stretches, humming up and down a scale, and three tongue-twisters.",
+                    'body' => 'Practise this five-minute warm-up before you come: shoulder rolls, jaw stretches, humming up and down a scale, and three tongue-twisters.',
                     'key_points' => "Shoulders and neck\nJaw and lips\nHumming scale\nTongue-twisters"]]],
         ]);
     }
@@ -278,7 +277,7 @@ class AcademyDemoSeeder extends Seeder
     {
         $course = $this->course([
             'title' => 'Using GODRAM CONNECT: a guide for coordinators',
-            'kind' => 'recorded', 'org_unit_id' => $national->id, 'cover_path' => 'archive:godram-11.webp',
+            'kind' => 'recorded', 'org_unit_id' => $national->id, 'cover_path' => 'gallery:osun-conference-5690.webp',
             'summary' => 'Short lessons on registering members, sending activity reports and keeping your Assembly informed.',
             'outcomes' => "Register members and confirm sign-ups\nSend an activity report with pictures\nPublish an announcement or an event for your area",
             'is_public' => false,
@@ -291,14 +290,14 @@ class AcademyDemoSeeder extends Seeder
         $this->outline($course, [
             ['title' => 'Your members', 'lessons' => [
                 ['title' => 'Registering a member', 'kind' => 'text', 'minutes' => 4,
-                    'body' => "Open **Members**, then **Register a member**. Enter the phone number first: GODRAM CONNECT checks whether the person is already registered elsewhere. Every member gets a Member ID such as GDM-000123, which they can use to sign in.",
+                    'body' => 'Open **Members**, then **Register a member**. Enter the phone number first: GODRAM CONNECT checks whether the person is already registered elsewhere. Every member gets a Member ID such as GDM-000123, which they can use to sign in.',
                     'key_points' => "Members, then Register a member\nPhone number first, to avoid duplicates\nEvery member gets a Member ID"],
                 ['title' => 'Confirming sign-ups', 'kind' => 'text', 'minutes' => 3,
-                    'body' => "When someone joins from the website and chooses your Assembly, they wait for you to confirm them. You will see them under **Sign-ups** on your dashboard."],
+                    'body' => 'When someone joins from the website and chooses your Assembly, they wait for you to confirm them. You will see them under **Sign-ups** on your dashboard.'],
             ]],
             ['title' => 'Reporting', 'lessons' => [
                 ['title' => 'Sending an activity report', 'kind' => 'text', 'minutes' => 6,
-                    'body' => "Open **Reports**, then **New report**. Your draft saves itself as you type, even if the network drops. Add pictures, then **Send for review**. Your District Coordinator approves it; your Region and the National office can read it and comment.",
+                    'body' => 'Open **Reports**, then **New report**. Your draft saves itself as you type, even if the network drops. Add pictures, then **Send for review**. Your District Coordinator approves it; your Region and the National office can read it and comment.',
                     'key_points' => "Reports, then New report\nDrafts save themselves\nThe level above approves",
                     'prompts' => [['type' => 'choice', 'question' => 'Who approves an Assembly activity report?', 'options' => ['The Regional Coordinator', 'The District Coordinator', 'The National Coordinator'], 'answer' => 'The District Coordinator']]],
             ]],
@@ -311,7 +310,7 @@ class AcademyDemoSeeder extends Seeder
     {
         $course = $this->course([
             'title' => 'Stage Management and Production Basics',
-            'kind' => 'recorded', 'org_unit_id' => $national->id,
+            'kind' => 'recorded', 'org_unit_id' => $national->id, 'cover_path' => 'gallery:stage-drama-05170.webp',
             'summary' => 'Props, costumes, cues and the running order: everything that happens so the actors can minister.',
             'status' => 'draft', 'published_at' => null,
         ], [[$trainer, 'Training Administrator']]);

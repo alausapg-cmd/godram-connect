@@ -2,10 +2,13 @@
 
 namespace App\Models\Concerns;
 
+use App\Support\SitePicture;
+use Illuminate\Support\Facades\Storage;
+
 /**
  * Cover pictures are either uploads (private disk, served by CoverController
- * after a visibility check) or images from the public GODRAM archive,
- * stored as "archive:godram-10.webp".
+ * after a visibility check) or pictures that ship with the site, stored as
+ * "archive:godram-10.webp" or "gallery:outreach-4731.webp" (see SitePicture).
  */
 trait HasCover
 {
@@ -14,8 +17,8 @@ trait HasCover
         if (! $this->cover_path) {
             return null;
         }
-        if (str_starts_with($this->cover_path, 'archive:')) {
-            return asset('images/archive/'.substr($this->cover_path, 8));
+        if (SitePicture::is($this->cover_path)) {
+            return SitePicture::url($this->cover_path);
         }
 
         return route('covers.show', [static::COVER_TYPE, $this->getKey(), 'v' => $this->updated_at?->timestamp]);
@@ -28,8 +31,8 @@ trait HasCover
             return null;
         }
 
-        return str_starts_with($this->cover_path, 'archive:')
-            ? public_path('images/archive/'.substr($this->cover_path, 8))
-            : \Illuminate\Support\Facades\Storage::disk('local')->path($this->cover_path);
+        return SitePicture::is($this->cover_path)
+            ? SitePicture::path($this->cover_path)
+            : Storage::disk('local')->path($this->cover_path);
     }
 }

@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Announcement;
+use App\Models\Course;
 use App\Models\Event;
 use App\Models\Production;
 use App\Models\ProductionImage;
 use App\Models\Story;
+use App\Models\Video;
 use App\Services\ShareCard;
+use App\Support\SitePicture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /** Serves uploaded cover pictures and share cards, after checking who may see them. */
 class CoverController extends Controller
@@ -23,7 +28,7 @@ class CoverController extends Controller
             'production-image' => (fn ($m) => [$m->path, $m->production->isVisibleTo($user)])(ProductionImage::with('production')->findOrFail($id)),
             default => abort(404),
         };
-        abort_unless($visible && $path && ! str_starts_with($path, 'archive:') && Storage::disk('local')->exists($path), 404);
+        abort_unless($visible && $path && ! SitePicture::is($path) && Storage::disk('local')->exists($path), 404);
 
         return response()->file(Storage::disk('local')->path($path), ['Content-Type' => 'image/webp', 'Cache-Control' => 'public, max-age=604800']);
     }
@@ -35,9 +40,9 @@ class CoverController extends Controller
             'event' => Event::where('slug', $slug)->where('visibility', 'public')->whereIn('status', ['published', 'cancelled'])->firstOrFail(),
             'story' => Story::published()->where('slug', $slug)->firstOrFail(),
             'showcase' => Production::published()->where('slug', $slug)->firstOrFail(),
-            'video' => \App\Models\Video::published()->where('slug', $slug)->firstOrFail(),
-            'course' => \App\Models\Course::published()->where('is_public', true)->where('slug', $slug)->firstOrFail(),
-            'announcement' => \App\Models\Announcement::live()->public()->whereKey((int) $slug)->firstOrFail(),
+            'video' => Video::published()->where('slug', $slug)->firstOrFail(),
+            'course' => Course::published()->where('is_public', true)->where('slug', $slug)->firstOrFail(),
+            'announcement' => Announcement::live()->public()->whereKey((int) $slug)->firstOrFail(),
             default => abort(404),
         };
 
@@ -47,7 +52,7 @@ class CoverController extends Controller
             'showcase' => ['Creative Showcase · '.$item->kindLabel(), $item->summary, $item->coverFile()],
             'video' => ['Watch on GODRAM TV · '.$item->categoryLabel(), null, null],
             'course' => ['GODRAM Virtual Academy · '.$item->kindLabel(), $item->enrol_by ? 'Enrol by '.$item->enrol_by->format('j F Y') : $item->orgUnit?->fullName(), $item->coverFile()],
-            'announcement' => ['GODRAM announcement · '.$item->published_at->format('j M Y'), \Illuminate\Support\Str::limit($item->body, 90), $item->image_path ? Storage::disk('local')->path($item->image_path) : null],
+            'announcement' => ['GODRAM announcement · '.$item->published_at->format('j M Y'), Str::limit($item->body, 90), $item->image_path ? Storage::disk('local')->path($item->image_path) : null],
         };
 
         $file = $cards->render($type.':'.$item->id.':'.$item->updated_at?->timestamp, $eyebrow, $item->title, $subtitle, $cover);

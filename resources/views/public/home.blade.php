@@ -157,7 +157,7 @@
                 <a href="{{ route('academy') }}" class="btn-gold mt-6 no-underline">About the Academy</a>
             </div>
             <div class="relative h-64 md:h-auto">
-                <img src="{{ asset('images/archive/godram-31.webp') }}" alt="1999 GICD training programme flyer listing courses for the Ordinary and Advanced Certificate in Christian Drama" class="absolute inset-0 h-full w-full object-cover object-top" loading="lazy">
+                <img src="{{ asset('images/gallery/osun-conference-5730.webp') }}" alt="A speaker teaching delegates at the Osun State Conference" class="absolute inset-0 h-full w-full object-cover" loading="lazy">
             </div>
         </div>
     </section>

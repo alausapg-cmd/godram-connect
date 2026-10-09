@@ -10,6 +10,7 @@ use App\Models\OrgUnit;
 use App\Models\Spotlight;
 use App\Models\Story;
 use App\Models\Video;
+use App\Support\SitePicture;
 use Illuminate\Http\Request;
 
 class PublicController extends Controller
@@ -29,7 +30,7 @@ class PublicController extends Controller
             'fact' => $facts ? $facts[now()->dayOfYear % count($facts)] : null,
             'announcements' => Announcement::live()->public()->orderByDesc('is_pinned')->latest('published_at')->limit(3)->get(),
             'highlights' => ActivityReport::where('status', 'published')->with(['orgUnit.parent', 'media'])->latest('published_at')->limit(3)->get(),
-            'archive' => collect(config('archive'))->take(8),
+            'archive' => SitePicture::unusedArchive()->shuffle()->take(8),
             'counts' => [
                 'regions' => OrgUnit::ofType(OrgUnit::REGION)->where('is_active', true)->count(),
                 'districts' => OrgUnit::ofType(OrgUnit::DISTRICT)->where('is_active', true)->count(),
@@ -62,7 +63,4 @@ class PublicController extends Controller
 
         return view('public.highlight', ['report' => $report->load('orgUnit.parent', 'media')]);
     }
-
-
-
 }

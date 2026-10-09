@@ -28,6 +28,14 @@ use Illuminate\Support\Facades\Storage;
  */
 class DemoSeeder extends Seeder
 {
+    /** Action photos already used as course, story and event covers or on the home page, kept out of report photos. */
+    public const COVER_PHOTOS = [
+        'stage-drama-4417.webp', 'stage-drama-05170.webp', 'osun-conference-5712.webp', 'convention-2026-5814.webp', 'osun-conference-5690.webp',
+        'outreach-4818.webp', 'convention-2026-5796.webp', 'outreach-4758.webp', 'osun-conference-5730.webp',
+        'stage-drama-05166.webp', 'convention-2026-5866.webp', 'stage-drama-05163.webp', 'osun-conference-5722.webp',
+        'stage-drama-05158.webp', 'outreach-4824.webp', 'osun-conference-5680.webp', 'stage-drama-05167.webp',
+    ];
+
     public const PASSWORD = 'GodramDemo2026';
 
     protected array $firstNames = [
@@ -197,7 +205,25 @@ class DemoSeeder extends Seeder
             'childrens_programme' => ["Children's Bible drama", "Children's Christmas pageant"],
         ];
         $locations = ['Church auditorium', 'Town hall', 'Market square', 'Community primary school', 'Motor park', 'Open field near the church'];
-        $images = collect(config('archive'))->where('kind', 'photo')->pluck('file')->all();
+        // Report photos come from the ministry's action photographs, matched to the kind of
+        // activity and never repeated, and never one already used in a page header.
+        $inHeaders = collect(config('heroes'))->flatten()->all();
+        $photos = collect(config('gallery'))->reject(fn ($g) => in_array('gallery/'.$g['file'], $inHeaders) || in_array($g['file'], self::COVER_PHOTOS))->shuffle()->groupBy('title')->map->pluck('file');
+        $pickPhoto = function (string $type) use (&$photos) {
+            $group = match (true) {
+                in_array($type, ActivityReport::OUTREACH_TYPES) => 'Drama outreach',
+                in_array($type, ['workshop', 'training', 'youth_programme']) => 'Osun State Conference',
+                in_array($type, ['theatre_performance', 'drama_presentation']) => 'Stage drama',
+                default => 'Beyond the Room',
+            };
+            $group = $photos->get($group, collect())->isNotEmpty() ? $group : $photos->filter->isNotEmpty()->keys()->first();
+            if (! $group) {
+                return null;
+            }
+            $file = $photos[$group]->shift();
+
+            return $file;
+        };
 
         $statusPool = ['approved', 'approved', 'approved', 'published', 'submitted', 'submitted', 'under_review', 'draft', 'rejected'];
 
@@ -238,10 +264,9 @@ class DemoSeeder extends Seeder
 
                 $this->history($report, $creator, $reviewer, $status, $date);
 
-                if (in_array($status, ['published', 'approved']) && $images) {
-                    $file = Arr::random($images);
+                if (in_array($status, ['published', 'approved']) && ($file = $pickPhoto($type))) {
                     $path = 'reports/'.$report->id.'/'.$file;
-                    Storage::disk('local')->put($path, file_get_contents(public_path('images/archive/'.$file)));
+                    Storage::disk('local')->put($path, file_get_contents(public_path('images/gallery/'.$file)));
                     ReportMedia::create(['activity_report_id' => $report->id, 'kind' => 'image', 'path' => $path, 'original_name' => $file, 'mime' => 'image/webp']);
                 }
             }

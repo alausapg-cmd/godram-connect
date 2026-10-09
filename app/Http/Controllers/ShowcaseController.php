@@ -9,6 +9,7 @@ use App\Models\Spotlight;
 use App\Services\Access;
 use App\Services\AuditLogger;
 use App\Services\ImageStore;
+use App\Support\SitePicture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -33,7 +34,8 @@ class ShowcaseController extends Controller
             'lead' => $lead,
             'items' => $lead ? $all->reject(fn ($p) => $p->id === $lead->id)->values() : $all,
             'kinds' => Production::published()->selectRaw('kind, count(*) as n')->groupBy('kind')->pluck('n', 'kind'),
-            'archive' => collect(config('archive')),
+            // The throwback strip leaves out pictures already shown elsewhere: covers, production photos and page headers.
+            'archive' => SitePicture::unusedArchive(),
             'canManage' => $this->access->can($request->user(), 'media.manage'),
         ]);
     }
@@ -82,7 +84,7 @@ class ShowcaseController extends Controller
         foreach ($request->input('remove_images', []) as $id) {
             $image = $production->images()->find($id);
             if ($image) {
-                if (! str_starts_with($image->path, 'archive:')) {
+                if (! SitePicture::is($image->path)) {
                     Storage::disk('local')->delete($image->path);
                 }
                 $image->delete();

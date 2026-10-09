@@ -12,7 +12,6 @@ use App\Models\Story;
 use App\Models\User;
 use App\Models\Video;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Arr;
 
 /**
  * Sample events, showcase items and stories for previews (all flagged is_demo).
@@ -109,7 +108,7 @@ class MediaDemoSeeder extends Seeder
             ['GACASA 2026: Annual Conference of All Saint Artistes', 'convention', $national, now()->addWeeks(9)->setTime(9, 0), now()->addWeeks(9)->addDays(2)->setTime(17, 0), 'Ibadan', false, 'https://www.youtube.com/@GODRAMTV/live', 'youtube', 'public', true, 800,
                 "The GODRAM Annual Conference of All Saint Artistes brings drama ministers from every Region together for three days of ministry, training, performances and fellowship.\n\nEvery Assembly should send at least two delegates. Register so the organisers can plan accommodation and feeding."],
             ['Christmas stage play: No Second Chance', 'performance', $region1, now()->addWeeks(11)->setTime(16, 0), now()->addWeeks(11)->setTime(19, 0), 'Ayantuga Assembly, Mushin', false, 'https://www.youtube.com/@GODRAMTV/live', 'youtube', 'public', false, null,
-                "Region 1 presents \"No Second Chance\", a stage play on the urgency of the Gospel. Bring a friend who has never been to church."],
+                'Region 1 presents "No Second Chance", a stage play on the urgency of the Gospel. Bring a friend who has never been to church.'],
             ['Acting fundamentals workshop', 'workshop', $agege, now()->addDays(12)->setTime(10, 0), now()->addDays(12)->setTime(15, 0), 'Agege Central Assembly', false, null, null, 'members', true, 40,
                 "A one-day workshop on voice, movement, character and stage presence, for new and returning drama ministers in Agege District.\n\nWear comfortable clothes and bring a notebook."],
             ['Lagos District combined Christmas rehearsal', 'district_programme', $lagos, now()->addDays(5)->setTime(10, 0), now()->addDays(5)->setTime(14, 0), 'District headquarters', false, null, null, 'members', false, null,
@@ -122,13 +121,23 @@ class MediaDemoSeeder extends Seeder
                 'An evening of Easter drama and worship from Mokola Assembly.'],
         ];
 
+        $covers = [
+            'GODRAM TV Sunday Night Live' => 'stage-drama-05166.webp', 'GACASA 2026: Annual Conference of All Saint Artistes' => 'convention-2026-5866.webp',
+            'Christmas stage play: No Second Chance' => 'stage-drama-05163.webp', 'Acting fundamentals workshop' => 'osun-conference-5722.webp',
+            'Lagos District combined Christmas rehearsal' => 'stage-drama-05158.webp', 'Market square outreach' => 'outreach-4824.webp',
+            'Online scriptwriting clinic' => 'osun-conference-5680.webp', 'Easter drama night' => 'stage-drama-05167.webp',
+        ];
+
         foreach ($events as [$title, $type, $unit, $start, $end, $location, $online, $stream, $platform, $visibility, $registration, $capacity, $description]) {
             $event = Event::create([
+                'cover_path' => isset($covers[$title]) ? 'gallery:'.$covers[$title] : null,
                 'title' => $title, 'type' => $type, 'org_unit_id' => $unit?->id, 'description' => $description,
                 'starts_at' => $start, 'ends_at' => $end, 'location' => $location, 'is_online' => $online,
                 'stream_url' => $stream, 'stream_platform' => $platform, 'visibility' => $visibility,
                 'registration_open' => $registration, 'capacity' => $capacity, 'status' => 'published', 'published_at' => now()->subDays(3),
-                'created_by' => $creator(match ($unit?->type) { 'district' => 'district_coordinator', 'region' => 'regional_coordinator', 'assembly' => 'assembly_coordinator', default => 'national_coordinator' }, $unit),
+                'created_by' => $creator(match ($unit?->type) {
+                    'district' => 'district_coordinator', 'region' => 'regional_coordinator', 'assembly' => 'assembly_coordinator', default => 'national_coordinator'
+                }, $unit),
                 'production_id' => str_contains($title, 'No Second Chance') ? $productions['films']->id : null,
                 'is_demo' => true,
             ]);
@@ -149,29 +158,29 @@ class MediaDemoSeeder extends Seeder
     {
         $author = fn (string $email) => User::where('email', $email)->first();
         $stories = [
-            ['How GODRAM began', 'milestone', 'national@demo.godram.test', 'published', true, 'godram-11',
+            ['How GODRAM began', 'milestone', 'national@demo.godram.test', 'published', true, 'archive:godram-14.webp',
                 'In 1991 a handful of drama groups in Lagos began training together. Thirty-five years later, they are a national ministry.',
                 "In 1991, with the permission of the Lagos District Overseer, Pastor S. A. Abiodun, Paul Adaramola began training drama groups in Lagos. Out of that work came the Gospel Drama Ministry: GODRAM.\n\nPaul Adaramola led the ministry, with Paul Alausa as its Secretary. The films that followed, beginning with \"Your Choice\" and \"Ohun Too Yan\", carried the message far beyond the church walls.\n\nIn 1996 GOFAMINT recognised GODRAM as a national department, the GOFAMINT Drama and Film Ministry. By 1999 its productions were being staged at the National Theatre, Iganmu, and at cultural centres in Ibadan, Benin and Port Harcourt.\n\nThe stage has changed. The story and the mission have not.",
                 'The Stage. The Story. The Mission.', 'GODRAM', null],
-            ['Forty-one drama ministers', 'milestone', 'content@demo.godram.test', 'published', false, 'godram-25',
+            ['Forty-one drama ministers', 'milestone', 'content@demo.godram.test', 'published', false, 'archive:godram-18.webp',
                 'In 1995 the GODRAM Institute of Christian Drama sent out its first graduates.',
                 "The programme for the pioneering graduation of the GODRAM Institute of Christian Drama still survives: Ayantuga Street, Mushin, 1995.\n\nForty-one drama ministers completed the course that year. They were trained not only to act, but to minister: to carry the Gospel through the stage and the screen.\n\nToday that work continues in the GODRAM Virtual Academy, where a new generation of drama ministers will learn, practise and be certified.",
                 null, null, 'graduation'],
-            ['I came for the drama and stayed for Christ', 'testimony', 'agege-central.member@demo.godram.test', 'published', false, 'godram-12',
+            ['I came for the drama and stayed for Christ', 'testimony', 'agege-central.member@demo.godram.test', 'published', false, 'gallery:outreach-4818.webp',
                 'A sample testimony from a market outreach in Agege.',
                 "I was selling at the market when the drama team set up. I only stopped because of the noise.\n\nThe play was about a man who kept postponing his decision for Christ. I saw myself in him. When the drama ended and the minister asked who wanted to give their life to Jesus, I raised my hand before I could think about it.\n\nThe Assembly followed me up that week. Two years later I joined the drama team myself. Now I am the one setting up in the market.",
                 'I saw myself in him.', 'A member of Agege Central Assembly', null],
-            ['From props to directing', 'creative_journey', 'akobo.member@demo.godram.test', 'published', false, 'godram-13',
+            ['From props to directing', 'creative_journey', 'akobo.member@demo.godram.test', 'published', false, 'gallery:convention-2026-5796.webp',
                 'A sample story of a member who started behind the scenes.',
                 "My first job in GODRAM was carrying chairs and looking after props. Nobody notices props until something is missing.\n\nOver the years I watched the directors closely. I learned how they placed actors, how they used silence, how they built a scene towards the moment of decision.\n\nLast year my Assembly asked me to direct our Easter drama. I was afraid, but I remembered every rehearsal I had watched from the side of the stage.",
                 null, null, null],
-            ['Behind the scenes of a market outreach', 'behind_the_scenes', 'agege-central.assembly@demo.godram.test', 'published', false, 'godram-2',
+            ['Behind the scenes of a market outreach', 'behind_the_scenes', 'agege-central.assembly@demo.godram.test', 'published', false, 'gallery:outreach-4758.webp',
                 'A sample account of what it takes to stage drama in the open air.',
                 "Open-air ministry is not the same as the church stage. There is no lighting, no curtain and plenty of competition for attention.\n\nWe rehearse with the noise of a generator running, so actors learn to project. Every scene is short. Every costume can be changed in seconds behind a parked bus.\n\nAnd we always plan the counselling before we plan the drama, because the drama is only the beginning.",
                 null, null, null],
             ['The night our Assembly performed at the District convention', 'member', 'moniya.member@demo.godram.test', 'submitted', false, null,
                 'A sample story waiting for review.',
-                "We had rehearsed for six weeks. On the night, the power went off halfway through the second scene…",
+                'We had rehearsed for six weeks. On the night, the power went off halfway through the second scene…',
                 null, null, null],
         ];
 
@@ -179,7 +188,7 @@ class MediaDemoSeeder extends Seeder
             $user = $author($email);
             Story::create([
                 'title' => $title, 'type' => $type, 'standfirst' => $standfirst, 'body' => $body,
-                'quote' => $quote, 'quote_by' => $quoteBy, 'cover_path' => $cover ? 'archive:'.$cover.'.webp' : null,
+                'quote' => $quote, 'quote_by' => $quoteBy, 'cover_path' => $cover,
                 'author_id' => $user?->id, 'org_unit_id' => $user?->member?->assembly()?->id,
                 'production_id' => $production ? $productions[$production]->id : null,
                 'status' => $status, 'is_featured' => $featured, 'reviewed_by' => $status === 'published' ? $reviewer?->id : null,

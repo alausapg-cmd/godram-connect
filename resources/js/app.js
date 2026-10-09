@@ -4,7 +4,7 @@ import Alpine from 'alpinejs';
 // Page header carousel: changes picture every few seconds, pauses while the
 // reader hovers, focuses or hides the tab, and only fetches a picture just
 // before it is shown, to spare mobile data.
-Alpine.data('carousel', (count, delay = 6500) => ({
+Alpine.data('carousel', (count, delay = 4875) => ({
     i: 0,
     seen: [0, 1],
     playing: false,
