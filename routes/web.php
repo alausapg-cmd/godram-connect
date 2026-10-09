@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Academy\LearnController;
 use App\Http\Controllers\Academy\ManageController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Exams\ExamController;
 use App\Http\Controllers\Exams\QuestionBankController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NetworkController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReportController;
@@ -68,6 +70,16 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+
+    Route::controller(NotificationController::class)->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/read', 'readAll')->name('read-all');
+        Route::get('/settings', 'settings')->name('settings');
+        Route::put('/settings', 'saveSettings')->name('settings.update');
+        Route::post('/devices', 'subscribe')->middleware('throttle:20,1')->name('devices.store');
+        Route::delete('/devices', 'unsubscribe')->name('devices.destroy');
+        Route::get('/{id}', 'open')->name('open');
+    });
 
     Route::get('/me', [ProfileController::class, 'show'])->name('profile');
     Route::get('/me/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -259,6 +271,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::put('/rules/{rule}', 'updateRule')->name('rules.update');
         Route::post('/{certificate}/revoke', 'revoke')->name('revoke');
     });
+
+    // Analytics
+    Route::get('/analytics', [AnalyticsController::class, 'show'])->name('analytics');
+    Route::get('/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
 
     // Administration
     Route::prefix('admin')->name('admin.')->group(function () {

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\ActivityReport;
 use App\Models\Announcement;
+use App\Models\Event;
 use App\Models\Member;
 use App\Models\OrgUnit;
 use App\Models\ReportEvent;
@@ -12,7 +13,9 @@ use App\Models\Role;
 use App\Models\RoleAssignment;
 use App\Models\Skill;
 use App\Models\User;
+use App\Notifications\GodramNotice;
 use App\Services\MembershipService;
+use App\Services\Notify;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -127,6 +130,24 @@ class DemoSeeder extends Seeder
         $this->call(MediaDemoSeeder::class);
         $this->call(AcademyDemoSeeder::class);
         $this->call(ExamDemoSeeder::class);
+        $this->sampleNotices();
+    }
+
+    /** A few notices so the bell and the Notifications page have something to show. */
+    protected function sampleNotices(): void
+    {
+        $notify = app(Notify::class);
+        foreach (ActivityReport::whereIn('status', ['submitted', 'under_review'])->with('orgUnit.parent')->limit(8)->get() as $report) {
+            $notify->send($notify->reviewersFor($report->orgUnit), new GodramNotice('reports', 'Report waiting for your review',
+                $report->orgUnit->fullName().': '.$report->displayTitle().'.', route('reports.show', $report)));
+        }
+        foreach (Announcement::live()->latest('published_at')->limit(2)->get() as $announcement) {
+            $notify->announcement($announcement);
+        }
+        if ($event = Event::where('status', 'published')->where('starts_at', '>', now())->orderBy('starts_at')->first()) {
+            $notify->send($notify->within($event->orgUnit), new GodramNotice('events', 'New event: '.$event->title,
+                $event->starts_at->format('l j F, g:ia').'.', route('events.show', $event)));
+        }
     }
 
     protected function coordinator(string $roleKey, OrgUnit $scope, OrgUnit $assembly, string $email, ?string $first = null, ?string $last = null): User

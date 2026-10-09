@@ -35,6 +35,21 @@ return [
         'resource_max_kb' => 25600,
     ],
 
+    // Notifications. Email and push are sent from the queue, which cron works through every minute
+    // (see routes/console.php). Set NOTIFY_QUEUE=sync to send straight away instead.
+    'notify' => [
+        'queue' => env('NOTIFY_QUEUE', 'database'),
+        // Day of the month on which Assembly Coordinators without a report that month get a reminder.
+        'report_reminder_day' => (int) env('GODRAM_REPORT_REMINDER_DAY', 25),
+    ],
+
+    // Web push (phone and browser notifications). Create the keys once with: php artisan godram:push-keys
+    'push' => [
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+        'subject' => env('VAPID_SUBJECT', 'mailto:'.env('MAIL_FROM_ADDRESS', 'hello@example.com')),
+    ],
+
     // When true, a banner tells visitors the data is sample data.
     'demo_mode' => env('GODRAM_DEMO_MODE', false),
 

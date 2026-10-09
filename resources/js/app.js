@@ -92,6 +92,57 @@ const postJson = async (url, data) => {
     return res.json();
 };
 
+// Phone and browser notifications for this device: ask once, then send the subscription to the server.
+Alpine.data('pushSwitch', (publicKey, storeUrl, deleteUrl) => ({
+    state: 'checking', // unsupported, ios-install, blocked, off, on, working
+    error: null,
+    async init() {
+        const ios = /iPhone|iPad/.test(navigator.userAgent);
+        const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+            this.state = ios && !standalone ? 'ios-install' : 'unsupported';
+            return;
+        }
+        if (Notification.permission === 'denied') { this.state = 'blocked'; return; }
+        const reg = await navigator.serviceWorker.ready;
+        this.state = (await reg.pushManager.getSubscription()) ? 'on' : 'off';
+    },
+    key() {
+        const pad = '='.repeat((4 - publicKey.length % 4) % 4);
+        const raw = atob((publicKey + pad).replace(/-/g, '+').replace(/_/g, '/'));
+        return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+    },
+    async turnOn() {
+        this.error = null;
+        this.state = 'working';
+        try {
+            if (await Notification.requestPermission() !== 'granted') { this.state = 'blocked'; return; }
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: this.key() });
+            const json = sub.toJSON();
+            const encoding = (PushManager.supportedContentEncodings || ['aesgcm']).includes('aes128gcm') ? 'aes128gcm' : 'aesgcm';
+            await postJson(storeUrl, { endpoint: json.endpoint, keys: json.keys, encoding });
+            this.state = 'on';
+        } catch (e) {
+            this.error = 'Could not switch on notifications here. Check your connection and try again.';
+            this.state = 'off';
+        }
+    },
+    async turnOff() {
+        this.state = 'working';
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                await fetch(deleteUrl, { method: 'DELETE', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() }, body: JSON.stringify({ endpoint: sub.endpoint }) });
+                await sub.unsubscribe();
+            }
+        } finally {
+            this.state = 'off';
+        }
+    },
+}));
+
 // Call-and-response inside a lesson: answer, see if it was right, see the poll.
 Alpine.data('callResponse', (url, mine = null) => ({
     answer: mine ?? '',

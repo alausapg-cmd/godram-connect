@@ -1,6 +1,6 @@
 // GODRAM Connect service worker: keeps the app shell and the offline page
 // available, caches built assets and archive images, never caches private pages.
-const VERSION = 'godram-v3';
+const VERSION = 'godram-v4';
 const SHELL = ['/offline', '/manifest.webmanifest', '/icons/icon-192.png', '/images/godram-logo.webp'];
 
 self.addEventListener('install', (event) => {
@@ -39,4 +39,29 @@ self.addEventListener('fetch', (event) => {
     if (request.mode === 'navigate') {
         event.respondWith(fetch(request).catch(() => caches.match('/offline')));
     }
+});
+
+// Push notifications: show the notice, and open the right page when it is tapped.
+self.addEventListener('push', (event) => {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; } catch (e) { data = { title: 'GODRAM CONNECT', body: event.data?.text() }; }
+    event.waitUntil(self.registration.showNotification(data.title || 'GODRAM CONNECT', {
+        body: data.body || '',
+        icon: data.icon || '/icons/icon-192.png',
+        badge: data.badge || '/icons/icon-192.png',
+        tag: data.tag,
+        renotify: !!data.tag,
+        data: { url: data.url || '/notifications' },
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const target = new URL(event.notification.data?.url || '/notifications', self.location.origin);
+    if (target.origin !== self.location.origin) return;
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+        const open = windows.find((w) => new URL(w.url).origin === target.origin);
+        if (open) return open.focus().then(() => open.navigate(target.href));
+        return self.clients.openWindow(target.href);
+    }));
 });

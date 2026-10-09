@@ -21,6 +21,8 @@ use App\Services\Achievements;
 use App\Services\AuditLogger;
 use App\Services\Cbt;
 use App\Services\MembershipService;
+use App\Services\Reminders;
+use App\Services\WebPush;
 use App\Services\YouTubeChannel;
 use App\Support\Phone;
 use Illuminate\Support\Facades\Artisan;
@@ -93,6 +95,9 @@ Artisan::command('godram:clear-demo', function () {
         Question::where('is_demo', true)->whereDoesntHave('uses')->delete();
         Course::where('is_demo', true)->delete();
         $ids = Member::where('is_demo', true)->pluck('id');
+        $users = User::whereIn('member_id', $ids)->pluck('id');
+        DB::table('notifications')->where('notifiable_type', User::class)->whereIn('notifiable_id', $users)->delete();
+        DB::table('push_subscriptions')->whereIn('user_id', $users)->delete();
         User::whereIn('member_id', $ids)->update(['is_active' => false, 'member_id' => null]);
         RoleAssignment::whereIn('member_id', $ids)->delete();
         TransferRequest::whereIn('member_id', $ids)->delete();
@@ -121,3 +126,37 @@ Artisan::command('godram:achievements', function (Achievements $achievements) {
 
 Schedule::command('godram:finalise-exams')->everyMinute()->withoutOverlapping();
 Schedule::command('godram:achievements')->dailyAt('02:30')->withoutOverlapping();
+
+Artisan::command('godram:reminders', function (Reminders $reminders) {
+    $sent = array_filter($reminders->run());
+    foreach ($sent as $kind => $count) {
+        $this->info("{$kind}: {$count} ".str('person')->plural($count).' reminded.');
+    }
+})->purpose('Send reminders for events, live sessions, assignments, examinations and monthly reports');
+
+Artisan::command('godram:push-keys {--show : Print the keys instead of adding them to .env}', function () {
+    if (filled(config('godram.push.public_key')) && ! $this->confirm('Push keys already exist. New keys switch off notifications on every phone until people turn them on again. Continue?', false)) {
+        return 1;
+    }
+    $keys = WebPush::newKeys();
+    $lines = ['VAPID_PUBLIC_KEY='.$keys['publicKey'], 'VAPID_PRIVATE_KEY='.$keys['privateKey']];
+    $env = base_path('.env');
+    if ($this->option('show') || ! is_writable($env)) {
+        $this->line('Add these two lines to .env:');
+        foreach ($lines as $line) {
+            $this->line($line);
+        }
+
+        return 0;
+    }
+    $contents = preg_replace('/^VAPID_(PUBLIC|PRIVATE)_KEY=.*\n?/m', '', file_get_contents($env));
+    file_put_contents($env, rtrim($contents).PHP_EOL.PHP_EOL.implode(PHP_EOL, $lines).PHP_EOL);
+    $this->info('Push keys added to .env. Run php artisan config:cache if you cache configuration.');
+})->purpose('Create the server keys for phone and browser notifications');
+
+Schedule::command('godram:reminders')->everyFifteenMinutes()->withoutOverlapping();
+
+// Emails and push notifications wait in the database queue; this sends them. Shared hosting has no
+// long-running workers, so cron starts a short worker each minute that stops when the queue is empty.
+Schedule::command('queue:work database --queue=default --stop-when-empty --max-time=50 --tries=3')
+    ->everyMinute()->withoutOverlapping()->when(fn () => config('godram.notify.queue') === 'database');

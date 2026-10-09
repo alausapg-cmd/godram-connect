@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -33,6 +34,31 @@ class User extends Authenticatable
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
+    /** Whether this person wants a notice of this category by email or push. Locked categories and important notices always go. */
+    public function wantsNotice(string $category, string $channel, bool $important = false): bool
+    {
+        $defaults = config('notifications.categories.'.$category);
+        if (! $defaults) {
+            return false;
+        }
+        if ($important || ($defaults['locked'] ?? false)) {
+            return true;
+        }
+        $choice = $this->notificationPreferences->firstWhere('category', $category);
+
+        return (bool) ($choice ? $choice->{$channel} : $defaults[$channel]);
     }
 
     /** @return Collection<int, RoleAssignment> */

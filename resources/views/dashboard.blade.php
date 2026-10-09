@@ -65,10 +65,12 @@
                 @if (can_do('reports.approve'))<a href="{{ route('reports.index', ['tab' => 'review']) }}" class="btn-ghost btn-sm no-underline">Review reports</a>@endif
                 @if (can_do('announcements.create'))<a href="{{ route('announcements.create') }}" class="btn-ghost btn-sm no-underline"><x-icon name="megaphone" class="size-4" />Announce</a>@endif
                 @if (can_do('members.view'))<a href="{{ route('members.index') }}" class="btn-ghost btn-sm no-underline">View members</a>@endif
+                @if (can_do('events.create'))<a href="{{ route('events.create') }}" class="btn-ghost btn-sm no-underline"><x-icon name="calendar" class="size-4" />Create event</a>@endif
+                @if (can_do('analytics.view'))<a href="{{ route('analytics', ['scope' => $scope->id]) }}" class="btn-ghost btn-sm no-underline"><x-icon name="chart" class="size-4" />View analytics</a>@endif
                 @if ($drafts)<a href="{{ route('reports.index', ['tab' => 'mine']) }}" class="btn-ghost btn-sm no-underline">{{ $drafts }} {{ str('draft')->plural($drafts) }}</a>@endif
             </div>
 
-            <div class="mt-6 grid gap-4 lg:grid-cols-3">
+            <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <div class="card-pad lg:col-span-2">
                     <h3 class="font-display text-lg font-semibold uppercase text-stage">{{ $scope->childType() ? str(ucfirst($scope->childType()))->plural() : 'Activity' }}</h3>
                     @if ($children->isNotEmpty())
@@ -136,14 +138,29 @@
                 @endforeach
             </div>
         @endif
-        <div class="mt-8 grid gap-4 lg:grid-cols-3">
+        @php $fresh = $user->unreadNotifications()->limit(3)->get(); @endphp
+        @if ($fresh->isNotEmpty())
+            <div class="card-pad mt-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="h-section">New for you</h2>
+                    <a href="{{ route('notifications.index') }}" class="link text-sm">All notifications</a>
+                </div>
+                @foreach ($fresh as $n)
+                    <a href="{{ route('notifications.open', $n->id) }}" class="mt-3 flex items-start gap-3 border-t border-line pt-3 no-underline first-of-type:border-0">
+                        <x-icon :name="config('notifications.categories.'.($n->data['category'] ?? '').'.icon', 'bell')" class="mt-0.5 size-5 shrink-0 text-poster" />
+                        <span class="min-w-0"><span class="block font-semibold text-ink">{{ $n->data['title'] ?? '' }}</span><span class="block text-sm text-ink-soft">{{ $n->data['body'] ?? '' }} · {{ $n->created_at->diffForHumans() }}</span></span>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+        <div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div class="card-pad lg:col-span-3">
                 <div class="flex items-center justify-between">
                     <h2 class="h-section">Coming up</h2>
                     <a href="{{ route('events') }}" class="link text-sm">All events</a>
                 </div>
                 @if ($events->isNotEmpty())
-                    <div class="mt-3 grid gap-3 md:grid-cols-3">
+                    <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
                         @foreach ($events as $event)
                             <div class="relative">
                                 <x-event-card :event="$event" class="h-full" />
@@ -156,7 +173,7 @@
                 @endif
             </div>
         </div>
-        <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div class="card-pad lg:col-span-2">
                 <div class="flex items-center justify-between">
                     <h2 class="h-section">Announcements for you</h2>

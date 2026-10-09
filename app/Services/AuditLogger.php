@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Jobs\RouteAuditEntry;
 use App\Models\AuditLog;
 use App\Models\OrgUnit;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +14,7 @@ class AuditLogger
 {
     public function log(string $action, ?Model $subject = null, ?string $summary = null, array $data = [], ?OrgUnit $unit = null, ?int $userId = null): AuditLog
     {
-        return DB::transaction(function () use ($action, $subject, $summary, $data, $unit, $userId) {
+        $entry = DB::transaction(function () use ($action, $subject, $summary, $data, $unit, $userId) {
             $previous = AuditLog::query()->orderByDesc('id')->lockForUpdate()->first();
 
             $entry = new AuditLog([
@@ -32,6 +34,24 @@ class AuditLogger
             $entry->save();
 
             return $entry;
+        });
+
+        if (Notify::routes($action)) {
+            $this->notifyAfterCommit($entry->id);
+        }
+
+        return $entry;
+    }
+
+    /** Hands the entry to the notifier once the change is saved. A notification problem never undoes the change itself. */
+    protected function notifyAfterCommit(int $id): void
+    {
+        DB::afterCommit(function () use ($id) {
+            try {
+                app(Dispatcher::class)->dispatch((new RouteAuditEntry($id))->onConnection(config('godram.notify.queue')));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         });
     }
 

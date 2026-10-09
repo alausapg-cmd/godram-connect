@@ -1,6 +1,7 @@
 @props(['title' => null, 'description' => null, 'image' => null, 'hideErrors' => false, 'dark' => false])
 @php
     $user = auth()->user();
+    $unreadCount = $user ? $user->unreadNotifications()->count() : 0;
     $workspace = $user ? array_filter([
         ['Dashboard', 'dashboard', 'home', true],
         ['Members', 'members.index', 'users', can_do('members.view')],
@@ -16,6 +17,7 @@
         ['Exams', 'exams.manage.index', 'pen', can_do('exams.manage'), 'exams.manage.*'],
         ['Question bank', 'questions.index', 'list', can_do('questions.review') && ! can_do('exams.manage'), 'questions.*'],
         ['Certificates', 'certificates.manage.index', 'award', can_do('certificates.issue'), 'certificates.manage.*'],
+        ['Analytics', 'analytics', 'chart', can_do('analytics.view')],
         ['Transfers', 'transfers.index', 'transfer', can_do('members.transfer.approve') || can_do('members.transfer.request')],
         ['Structure', 'admin.units.index', 'network', can_do('org.manage')],
         ['Roles', 'admin.roles.index', 'shield', can_do('roles.manage')],
@@ -70,6 +72,11 @@
         <div class="flex items-center gap-2">
             <a href="{{ route('search') }}" class="rounded-full p-2 text-paper/75 hover:text-white" title="Search"><x-icon name="search" /><span class="sr-only">Search</span></a>
             @auth
+                <a href="{{ route('notifications.index') }}" class="relative rounded-full p-2 text-paper/75 hover:text-white" title="Notifications">
+                    <x-icon name="bell" />
+                    @if ($unreadCount)<span class="absolute right-0.5 top-0.5 flex min-w-4.5 items-center justify-center rounded-full bg-curtain px-1 text-[10px] font-bold leading-4.5 text-white">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>@endif
+                    <span class="sr-only">Notifications{{ $unreadCount ? ', '.$unreadCount.' unread' : '' }}</span>
+                </a>
                 <a href="{{ route('dashboard') }}" class="hidden items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 text-sm font-medium text-paper no-underline hover:bg-white/15 sm:flex">
                     @if ($user->member)<x-avatar :member="$user->member" size="size-8" />@endif
                     <span>My GODRAM</span>
