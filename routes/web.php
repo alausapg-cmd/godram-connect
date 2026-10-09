@@ -252,6 +252,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::prefix('certificates/manage')->name('certificates.manage.')->controller(CertificateController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/issue', 'create')->name('create');
+        Route::get('/designs/{kind}', 'specimen')->name('specimen');
         Route::post('/issue', 'store')->name('store');
         Route::post('/signatures', 'signature')->name('signature');
         Route::post('/rules', 'storeRule')->name('rules.store');

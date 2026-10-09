@@ -291,4 +291,14 @@ class CbtTest extends TestCase
         $this->assertSame('achievement', Certificate::firstOrFail()->kind);
         $this->actingAs($member->user)->get(route('certificates.mine'))->assertOk()->assertSee('Ten years of service')->assertSee('Twenty years of service');
     }
+
+    public function test_each_kind_of_certificate_has_its_own_design(): void
+    {
+        foreach (array_keys(Certificate::KINDS) as $kind) {
+            $this->assertTrue(view()->exists('certificates.designs.'.$kind), $kind);
+            $this->actingAs($this->users['national'])->get(route('certificates.manage.specimen', $kind))->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        }
+        $this->actingAs($this->users['lagos'])->get(route('certificates.manage.specimen', 'training'))->assertForbidden();
+        $this->actingAs($this->users['national'])->get(route('certificates.manage.specimen', 'other'))->assertNotFound();
+    }
 }

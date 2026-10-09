@@ -47,7 +47,7 @@ class Certificates
 
         return $this->issue($member, [
             'kind' => $exam->course_id ? 'training' : 'examination',
-            'title' => $exam->course_id ? 'Certificate of Completion' : 'Certificate of Achievement',
+            'title' => $exam->course_id ? 'Certificate of Completion' : 'Examination Certificate',
             'achievement' => $exam->course_id ? 'has successfully completed the training and passed its examination' : 'has passed the examination',
             'programme' => $programme,
             'eligibility_rule' => $rule,
@@ -60,8 +60,8 @@ class Certificates
     {
         return $this->issue($member, [
             'kind' => 'achievement',
-            'title' => 'Certificate of Recognition',
-            'achievement' => 'is recognised for '.Str::lcfirst($rule->name),
+            'title' => 'Certificate of Achievement',
+            'achievement' => 'for reaching the milestone: '.$rule->name,
             'programme' => $rule->kindLabel(),
             'eligibility_rule' => 'Achievement rule "'.$rule->name.'": '.$rule->ruleText().'.',
             'achievement_rule_id' => $rule->id,
@@ -159,11 +159,32 @@ class Certificates
         return (new QRCode($options))->render($text);
     }
 
-    public function pdf(Certificate $certificate): string
+    /** An unsaved sample of each design, so officers can see what members will receive. */
+    public function specimen(string $kind): Certificate
+    {
+        $samples = [
+            'training' => ['Certificate of Completion', 'has successfully completed the training and passed its examination', 'Foundations of Drama Ministry'],
+            'examination' => ['Examination Certificate', 'has passed the examination', 'GODRAM Drama Ministers\' Certification '.now()->year],
+            'achievement' => ['Certificate of Achievement', 'for reaching the milestone: Ten years of service', 'Years of service'],
+            'recognition' => ['Certificate of Recognition', 'is recognised for outstanding service to the drama ministry', 'GODRAM National Convention '.now()->year],
+        ];
+        [$title, $achievement, $programme] = $samples[$kind];
+
+        return new Certificate([
+            'number' => str_replace(['{Y}', '{N}'], [now()->year, str_repeat('0', config('godram.certificates.number_digits') - 1).'1'], config('godram.certificates.number_format')),
+            'recipient_name' => 'Adeola Grace Ogunleye', 'kind' => $kind, 'title' => $title, 'achievement' => $achievement, 'programme' => $programme,
+            'issued_on' => today(), 'issuing_authority' => config('godram.certificates.issuing_authority'), 'signatories' => $this->signatories(),
+        ]);
+    }
+
+    /** Each kind of certificate has its own design in resources/views/certificates/designs. */
+    public function pdf(Certificate $certificate, bool $specimen = false): string
     {
         $image = fn (?string $path) => $path && Storage::disk('local')->exists($path)
             ? 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get($path)) : null;
-        $html = view('certificates.pdf', [
+        $design = array_key_exists($certificate->kind, Certificate::KINDS) ? $certificate->kind : 'examination';
+        $html = view('certificates.designs.'.$design, [
+            'specimen' => $specimen,
             'certificate' => $certificate,
             'qr' => $this->qrDataUri($certificate->verifyUrl()),
             'logo' => 'data:image/png;base64,'.base64_encode(file_get_contents(public_path('icons/icon-192.png'))),

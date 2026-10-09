@@ -90,6 +90,17 @@ class CertificateController extends Controller
         ]);
     }
 
+    public function specimen(string $kind)
+    {
+        abort_unless(can_do('certificates.issue'), 403);
+        abort_unless(array_key_exists($kind, Certificate::KINDS), 404);
+
+        return response($this->certificates->pdf($this->certificates->specimen($kind), specimen: true), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="specimen-'.$kind.'.pdf"',
+        ]);
+    }
+
     public function create()
     {
         abort_unless(can_do('certificates.issue'), 403);

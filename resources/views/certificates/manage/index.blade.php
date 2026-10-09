@@ -9,7 +9,7 @@
         </div>
 
         <div class="mt-6 flex gap-2 border-b border-line" role="tablist">
-            @foreach (['issued' => 'Issued', 'signatures' => 'Signatures', 'rules' => 'Achievement rules'] as $k => $l)
+            @foreach (['issued' => 'Issued', 'designs' => 'Designs', 'signatures' => 'Signatures', 'rules' => 'Achievement rules'] as $k => $l)
                 <button type="button" role="tab" @click="tab = '{{ $k }}'" :aria-selected="tab === '{{ $k }}'" class="-mb-px border-b-2 px-4 py-2 text-sm font-semibold" :class="tab === '{{ $k }}' ? 'border-curtain text-curtain' : 'border-transparent text-ink-soft'">{{ $l }}</button>
             @endforeach
         </div>
@@ -49,6 +49,20 @@
                 </div>
                 <div class="mt-4">{{ $certificates->links() }}</div>
             @endif
+        </div>
+
+        <div x-show="tab === 'designs'" x-cloak class="mt-4">
+            <p class="text-sm text-ink-soft">Each kind of certificate has its own design. Open one to see a sample with today's signatures.</p>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach (['training' => ['Academy red, with a "Trained" seal', 'bg-curtain'], 'examination' => ['Formal black frame, "Certified" stamp', 'bg-stage'], 'achievement' => ['Gold border and star medal', 'bg-gold'], 'recognition' => ['Dark stage with gold lettering', 'bg-stage-2']] as $kind => [$text, $swatch])
+                    <a href="{{ route('certificates.manage.specimen', $kind) }}" target="_blank" class="card-pad block no-underline hover:border-ink-soft">
+                        <span class="block h-2 w-12 rounded-full {{ $swatch }}"></span>
+                        <span class="mt-3 block font-semibold">{{ \App\Models\Certificate::KINDS[$kind] }}</span>
+                        <span class="text-sm text-ink-soft">{{ $text }}</span>
+                        <span class="link mt-2 block text-sm">View sample</span>
+                    </a>
+                @endforeach
+            </div>
         </div>
 
         <div x-show="tab === 'signatures'" x-cloak class="mt-4 grid gap-4 md:grid-cols-2">
