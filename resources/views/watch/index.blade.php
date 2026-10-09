@@ -72,10 +72,9 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-3xl bg-white/5 px-6 py-14 text-center ring-1 ring-white/10">
-                    <p class="font-display text-2xl font-semibold uppercase">The GODRAM TV library is being stocked</p>
-                    <p class="mx-auto mt-2 max-w-md text-paper/70">Films, drama performances and live broadcasts will appear here. Until then, every GODRAM TV video is on YouTube.</p>
-                    <a href="{{ config('godram.links.youtube') }}" target="_blank" rel="noopener" class="btn-gold mt-6 no-underline">Watch GODRAM TV on YouTube</a>
+                <div class="space-y-4">
+                    <x-youtube-channel />
+                    <p class="text-sm text-paper/70">New GODRAM TV uploads are added to this page automatically every hour. <a href="{{ config('godram.links.youtube') }}" target="_blank" rel="noopener" class="font-semibold text-gold">Open the channel on YouTube</a></p>
                 </div>
             @endforelse
 

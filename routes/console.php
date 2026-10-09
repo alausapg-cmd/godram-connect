@@ -81,3 +81,10 @@ Artisan::command('godram:clear-demo', function () {
     });
     $this->info('Demo data removed. The organisation structure was kept; edit or replace it under Administration.');
 })->purpose('Remove sample data before real use');
+
+Artisan::command('godram:sync-youtube', function (\App\Services\YouTubeChannel $channel) {
+    $added = $channel->import();
+    $this->info($added ? "Added {$added} new GODRAM TV ".str('video')->plural($added).' to the Watch centre.' : 'No new GODRAM TV videos.');
+})->purpose('Add new GODRAM TV uploads to the Watch centre');
+
+\Illuminate\Support\Facades\Schedule::command('godram:sync-youtube')->hourly()->withoutOverlapping();

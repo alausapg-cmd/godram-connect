@@ -10,6 +10,12 @@ return [
         'whatsapp' => env('GODRAM_WHATSAPP_URL'),
     ],
 
+    // GODRAM TV. New uploads are imported hourly (godram:sync-youtube) into the Watch centre.
+    'youtube' => [
+        'channel_id' => env('GODRAM_YOUTUBE_CHANNEL_ID', 'UCRJnL2sj9MASfswKg9Sle1A'),
+        'import_category' => env('GODRAM_YOUTUBE_IMPORT_CATEGORY', 'drama_performances'),
+    ],
+
     'uploads' => [
         'image_max_kb' => 8192,
         'document_max_kb' => 10240,

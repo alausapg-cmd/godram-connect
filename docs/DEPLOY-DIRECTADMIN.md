@@ -118,6 +118,8 @@ DirectAdmin: **Cron Jobs** → every minute (`* * * * *`):
 cd ~/godram-connect && php artisan schedule:run >> /dev/null 2>&1
 ```
 
+The schedule includes an hourly import of new GODRAM TV uploads into the Watch centre. To fill the Watch centre straight away, run `php artisan godram:sync-youtube` once.
+
 ## Updating to a new version
 
 1. Download the newest package from GitHub Actions.

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <title>GODRAM TV</title>
+ <yt:channelId>UCRJnL2sj9MASfswKg9Sle1A</yt:channelId>
+ <entry>
+  <id>yt:video:AAAAAAAAAA1</id>
+  <yt:videoId>AAAAAAAAAA1</yt:videoId>
+  <title>The Prodigal Returns</title>
+  <published>2026-10-01T18:00:00+00:00</published>
+  <media:group><media:title>The Prodigal Returns</media:title><media:description>A GODRAM drama.</media:description></media:group>
+ </entry>
+ <entry>
+  <id>yt:video:BBBBBBBBBB2</id>
+  <yt:videoId>BBBBBBBBBB2</yt:videoId>
+  <title>Behind the scenes</title>
+  <published>2026-09-20T18:00:00+00:00</published>
+  <media:group><media:title>Behind the scenes</media:title><media:description></media:description></media:group>
+ </entry>
+</feed>

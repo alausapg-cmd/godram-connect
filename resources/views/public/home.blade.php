@@ -92,6 +92,13 @@
                 </div>
             </div>
         </section>
+    @elseif (\App\Services\YouTubeChannel::uploadsPlaylistId())
+        <section class="mt-12 bg-stage py-10 text-paper">
+            <div class="container-page grid items-center gap-6 lg:grid-cols-[1fr_1.4fr]">
+                <div><p class="eyebrow text-gold">GODRAM TV</p><h2 class="mt-1 font-display text-3xl font-semibold uppercase">Watch GODRAM TV</h2><p class="mt-2 text-paper/70">Films, drama ministrations and broadcasts from the GODRAM TV channel.</p><a href="{{ route('watch') }}" class="btn-gold mt-5 no-underline">The Watch centre</a></div>
+                <x-youtube-channel />
+            </div>
+        </section>
     @endif
 
     @if ($upcoming->isNotEmpty())
