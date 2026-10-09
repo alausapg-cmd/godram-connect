@@ -33,4 +33,9 @@ class PublicSiteTest extends TestCase
         $this->assertFileExists(public_path('icons/icon-512.png'));
         $this->assertJson(file_get_contents(public_path('manifest.webmanifest')));
     }
+
+    public function test_an_unknown_address_shows_the_not_found_page(): void
+    {
+        $this->get('/no-such-page')->assertNotFound()->assertSee('We could not find that page');
+    }
 }

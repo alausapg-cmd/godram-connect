@@ -14,7 +14,7 @@
         </div>
     </div>
 @endif
-@if ($errors->any() && ! ($hideErrors ?? false))
+@if (isset($errors) && $errors->any() && ! ($hideErrors ?? false))
     <div class="container-page mt-4" role="alert">
         <div class="flex items-start gap-3 rounded-xl border border-curtain/30 bg-curtain/5 px-4 py-3 text-sm text-curtain">
             <x-icon name="alert" class="mt-0.5 size-4 shrink-0" />
