@@ -118,7 +118,13 @@ DirectAdmin: **Cron Jobs** → every minute (`* * * * *`):
 cd ~/godram-connect && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-The schedule includes an hourly import of new GODRAM TV uploads into the Watch centre. To fill the Watch centre straight away, run `php artisan godram:sync-youtube` once.
+The schedule includes:
+
+- an hourly import of new GODRAM TV uploads into the Watch centre (to fill it straight away, run `php artisan godram:sync-youtube` once);
+- every minute, submitting examination attempts whose time ran out while the candidate was offline;
+- every night, checking members against the achievement rules.
+
+The examination timer itself never depends on cron: the server checks the deadline on every answer it receives. Cron only tidies up papers whose candidate never came back.
 
 ## Updating to a new version
 
@@ -131,6 +137,7 @@ cd ~/godram-connect
 php artisan down
 php artisan migrate --force
 php artisan db:seed --class=AccessSeeder --force   # adds any new permissions; safe to repeat
+php artisan db:seed --class=AchievementRuleSeeder --force   # starting achievement rules; safe to repeat
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 php artisan up
 ```

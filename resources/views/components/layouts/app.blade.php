@@ -9,9 +9,13 @@
         ['Videos', 'videos.manage', 'play', can_do('media.submit')],
         ['Stories', can_do('stories.review') ? 'stories.manage' : 'stories.mine', 'quote', true],
         ['My learning', 'academy.mine', 'academy', (bool) $user?->member_id, 'academy.mine'],
+        ['My certificates', 'certificates.mine', 'award', (bool) $user?->member_id, 'certificates.mine'],
         ...(can_do('training.manage') || ($user?->member_id && \App\Models\CourseFacilitator::where('member_id', $user->member_id)->exists())
             ? [['Training', 'academy.manage.index', 'list', true, 'academy.manage.*']]
             : [['Training', 'academy.overview', 'list', can_do('training.view'), 'academy.overview']]),
+        ['Exams', 'exams.manage.index', 'pen', can_do('exams.manage'), 'exams.manage.*'],
+        ['Question bank', 'questions.index', 'list', can_do('questions.review') && ! can_do('exams.manage'), 'questions.*'],
+        ['Certificates', 'certificates.manage.index', 'award', can_do('certificates.issue'), 'certificates.manage.*'],
         ['Transfers', 'transfers.index', 'transfer', can_do('members.transfer.approve') || can_do('members.transfer.request')],
         ['Structure', 'admin.units.index', 'network', can_do('org.manage')],
         ['Roles', 'admin.roles.index', 'shield', can_do('roles.manage')],

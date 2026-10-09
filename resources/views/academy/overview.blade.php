@@ -49,7 +49,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="mt-3 text-xs text-ink-soft">Live attendance counts members who opened the class room during the class or were confirmed by a facilitator. Exam results and pass rates are added with the examination system.</p>
+            <p class="mt-3 text-xs text-ink-soft">Live attendance counts members who opened the class room during the class or were confirmed by a facilitator. Examination results and pass rates are under Examinations.</p>
         @endif
     </section>
 </x-layouts.app>

@@ -16,6 +16,15 @@ return [
         'import_category' => env('GODRAM_YOUTUBE_IMPORT_CATEGORY', 'drama_performances'),
     ],
 
+    // Certificates. {Y} is the year of issue and {N} a running number for that year.
+    'certificates' => [
+        'number_format' => env('GODRAM_CERTIFICATE_FORMAT', 'GODRAM-CERT-{Y}-{N}'),
+        'number_digits' => 6,
+        'issuing_authority' => env('GODRAM_CERTIFICATE_AUTHORITY', 'GOFAMINT Drama & Film Ministry (GODRAM), National Headquarters'),
+        // Roles whose current holders sign certificates, in order.
+        'signatory_roles' => ['national_coordinator', 'training_administrator'],
+    ],
+
     'uploads' => [
         'image_max_kb' => 8192,
         'document_max_kb' => 10240,

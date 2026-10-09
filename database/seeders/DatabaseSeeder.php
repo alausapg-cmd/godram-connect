@@ -9,6 +9,6 @@ class DatabaseSeeder extends Seeder
     /** Reference data only. Demo data is loaded separately with DemoSeeder. */
     public function run(): void
     {
-        $this->call([AccessSeeder::class, SkillSeeder::class]);
+        $this->call([AccessSeeder::class, SkillSeeder::class, AchievementRuleSeeder::class]);
     }
 }

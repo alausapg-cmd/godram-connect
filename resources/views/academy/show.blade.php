@@ -99,10 +99,20 @@
                             @endif
                         </li>
                     @endforeach
-                    <li class="flex items-center gap-3 rounded-[var(--radius-card)] border border-dashed border-line px-4 py-3 text-sm text-ink-soft sm:px-5">
-                        <x-icon name="award" class="size-5 shrink-0 text-poster" />
-                        <span><span class="font-semibold text-ink">Examination and certificate.</span> Online examinations and verifiable certificates are being added to the Academy.</span>
-                    </li>
+                    @php $exams = $course->exams()->published()->get(); @endphp
+                    @forelse ($exams as $exam)
+                        <li class="flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border border-line bg-white px-4 py-3 text-sm sm:px-5">
+                            <x-icon name="award" class="size-5 shrink-0 text-poster" />
+                            <span class="min-w-0 flex-1"><span class="font-semibold text-ink">{{ $exam->title }}</span><span class="block text-ink-soft">{{ $exam->modeLabel() }} · {{ $exam->plannedCount() }} questions · {{ $exam->duration_minutes }} min · pass mark {{ $exam->pass_mark }}%{{ $exam->awards_certificate ? ' · certificate for a pass' : '' }}{{ $exam->requires_course_completion ? ' · after every lesson' : '' }}</span></span>
+                            @if ($enrolment)<a href="{{ route('exams.show', $exam) }}" class="btn-dark btn-sm no-underline">Open</a>@endif
+                        </li>
+                    @empty
+                        <li class="flex items-center gap-3 rounded-[var(--radius-card)] border border-dashed border-line px-4 py-3 text-sm text-ink-soft sm:px-5">
+                            <x-icon name="award" class="size-5 shrink-0 text-poster" />
+                            <span><span class="font-semibold text-ink">Examination and certificate.</span> {{ $canTeach ? 'This training has no examination yet.' : 'Any examination for this training will appear here.' }}</span>
+                            @if ($canTeach && can_do('exams.manage', $course->orgUnit))<a href="{{ route('exams.manage.create', ['course' => $course->slug]) }}" class="btn-ghost btn-sm ml-auto no-underline">Add one</a>@endif
+                        </li>
+                    @endforelse
                 </ol>
             </div>
 

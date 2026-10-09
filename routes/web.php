@@ -6,12 +6,16 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
 use App\Http\Controllers\AnnouncementController;
-use App\Http\Controllers\CoverController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CoverController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\Exams\CertificateController;
+use App\Http\Controllers\Exams\ExamAdminController;
+use App\Http\Controllers\Exams\ExamController;
+use App\Http\Controllers\Exams\QuestionBankController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ProfileController;
@@ -41,6 +45,8 @@ Route::get('/offline', fn () => view('offline'))->name('offline');
 Route::get('/search', SearchController::class)->name('search');
 Route::get('/covers/{type}/{id}', [CoverController::class, 'show'])->whereNumber('id')->name('covers.show');
 Route::get('/share/{type}/{slug}.png', [CoverController::class, 'share'])->name('share.card');
+Route::get('/verify', [CertificateController::class, 'lookup'])->name('certificates.lookup');
+Route::get('/verify/{number}', [CertificateController::class, 'verify'])->middleware('throttle:30,1')->name('certificates.verify');
 
 // Sign-in
 Route::middleware('guest')->group(function () {
@@ -199,6 +205,58 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/questions', 'ask')->middleware('throttle:20,1')->name('ask');
         Route::get('/assignments/{assignment}', 'assignment')->name('assignment');
         Route::post('/assignments/{assignment}', 'submit')->name('submit');
+    });
+
+    // CBT examinations: question bank and exam administration
+    Route::prefix('question-bank')->name('questions.')->controller(QuestionBankController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::post('/categories', 'storeCategory')->name('categories.store');
+        Route::get('/{question}/edit', 'edit')->name('edit');
+        Route::put('/{question}', 'update')->name('update');
+        Route::post('/{question}/review', 'review')->name('review');
+        Route::get('/{question}/media', 'media')->name('media');
+    });
+    Route::prefix('exams/manage')->name('exams.manage.')->controller(ExamAdminController::class)->scopeBindings()->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{exam}', 'show')->name('show');
+        Route::get('/{exam}/edit', 'edit')->name('edit');
+        Route::put('/{exam}', 'update')->name('update');
+        Route::post('/{exam}/status', 'status')->name('status');
+        Route::post('/{exam}/release', 'release')->name('release');
+        Route::get('/{exam}/attempts/{attempt}', 'attempt')->name('attempt');
+        Route::post('/{exam}/attempts/{attempt}/mark', 'mark')->name('mark');
+        Route::post('/{exam}/attempts/{attempt}/extend', 'extend')->name('extend');
+    });
+
+    // CBT examinations: candidates
+    Route::controller(ExamController::class)->name('exams.')->group(function () {
+        Route::get('/exams', 'index')->name('index');
+        Route::get('/exams/attempts/{attempt}', 'sit')->name('sit');
+        Route::get('/exams/attempts/{attempt}/state', 'state')->middleware('throttle:60,1')->name('state');
+        Route::post('/exams/attempts/{attempt}/answers', 'save')->middleware('throttle:240,1')->name('save');
+        Route::post('/exams/attempts/{attempt}/signal', 'signal')->middleware('throttle:60,1')->name('signal');
+        Route::post('/exams/attempts/{attempt}/submit', 'submit')->name('submit');
+        Route::get('/exams/attempts/{attempt}/result', 'result')->name('result');
+        Route::get('/exams/attempts/{attempt}/media/{position}', 'media')->whereNumber('position')->name('media');
+        Route::get('/exams/{exam}', 'show')->name('show');
+        Route::post('/exams/{exam}/start', 'start')->middleware('throttle:10,1')->name('start');
+    });
+
+    // Certificates and achievements
+    Route::get('/my-certificates', [CertificateController::class, 'mine'])->name('certificates.mine');
+    Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
+    Route::prefix('certificates/manage')->name('certificates.manage.')->controller(CertificateController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/issue', 'create')->name('create');
+        Route::post('/issue', 'store')->name('store');
+        Route::post('/signatures', 'signature')->name('signature');
+        Route::post('/rules', 'storeRule')->name('rules.store');
+        Route::put('/rules/{rule}', 'updateRule')->name('rules.update');
+        Route::post('/{certificate}/revoke', 'revoke')->name('revoke');
     });
 
     // Administration

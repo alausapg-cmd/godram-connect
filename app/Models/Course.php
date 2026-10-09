@@ -82,6 +82,11 @@ class Course extends Model
         return $this->hasMany(Enrolment::class);
     }
 
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class);
+    }
+
     public function prompts(): HasMany
     {
         return $this->hasMany(Prompt::class);

@@ -123,6 +123,224 @@ Alpine.data('liveRoom', (feedUrl, askUrl, sessionId) => ({
     },
 }));
 
+// The CBT examination screen. The server keeps the clock and the marks; this keeps
+// answers safe on the phone until the server confirms them, and retries when the
+// connection comes back. Every save carries a revision number so an old save can
+// never overwrite a newer answer.
+Alpine.data('cbt', (config) => ({
+    questions: config.questions,
+    i: 0,
+    offset: config.now - Date.now(),
+    deadline: config.deadline,
+    left: Math.max(0, Math.floor((config.deadline - config.now) / 1000)),
+    online: navigator.onLine,
+    queue: {},
+    sending: false,
+    state: 'saved',
+    submitting: false,
+    confirming: false,
+    palette: false,
+    finished: false,
+    notice: '',
+    warned: Object.fromEntries([10, 5, 1].filter((m) => (config.deadline - config.now) / 1000 <= m * 60 + 5).map((m) => [m, true])),
+    shownAt: Date.now(),
+    flushTimer: null,
+    key: 'godram-cbt-' + config.attempt,
+
+    init() {
+        // Answers typed while offline survive a reload or a closed tab.
+        try {
+            const saved = JSON.parse(localStorage.getItem(this.key) || '{}');
+            Object.values(saved).forEach((entry) => {
+                const q = this.questions.find((x) => x.position === entry.position);
+                if (q && entry.revision > q.revision) {
+                    q.response = entry.response;
+                    q.flagged = entry.flagged;
+                    q.revision = entry.revision;
+                    this.queue[q.position] = entry;
+                }
+            });
+        } catch (e) { /* storage unavailable */ }
+        const first = this.questions.findIndex((q) => !this.isAnswered(q));
+        this.i = first > 0 ? first : 0;
+
+        setInterval(() => this.tick(), 1000);
+        setInterval(() => this.flush(), 5000);
+        setInterval(() => this.sync(), 30000);
+        window.addEventListener('online', () => { this.online = true; this.signal('online'); this.flush(); this.sync(); });
+        window.addEventListener('offline', () => { this.online = false; this.state = 'offline'; this.signal('offline'); });
+        document.addEventListener('visibilitychange', () => { if (document.hidden && !this.finished) this.signal('focus_lost'); });
+        window.addEventListener('beforeunload', (e) => { if (Object.keys(this.queue).length && !this.finished) e.preventDefault(); });
+        document.addEventListener('keydown', (e) => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName) || this.confirming) return;
+            if (e.key === 'ArrowRight') this.go(this.i + 1);
+            if (e.key === 'ArrowLeft') this.go(this.i - 1);
+        });
+        this.signal('presented', { position: this.q.position });
+        if (Object.keys(this.queue).length) this.flush();
+    },
+
+    get q() { return this.questions[this.i]; },
+    get total() { return this.questions.length; },
+    get answeredCount() { return this.questions.filter((q) => this.isAnswered(q)).length; },
+    get flaggedCount() { return this.questions.filter((q) => q.flagged).length; },
+    get unansweredCount() { return this.total - this.answeredCount; },
+    get clock() {
+        const h = Math.floor(this.left / 3600), m = Math.floor((this.left % 3600) / 60), s = this.left % 60;
+        return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+    },
+
+    isAnswered(q) {
+        const r = q.response;
+        if (r === null || r === undefined || r === '') return false;
+        if (Array.isArray(r)) return r.length > 0;
+        if (typeof r === 'object') return Object.values(r).some((v) => v !== null && v !== '');
+        return true;
+    },
+
+    tick() {
+        this.left = Math.max(0, Math.floor((this.deadline - (Date.now() + this.offset)) / 1000));
+        for (const [mins, text] of [[10, '10 minutes left.'], [5, '5 minutes left. Check your flagged questions.'], [1, 'One minute left. Your answers are being saved.']]) {
+            if (this.left <= mins * 60 && this.left > (mins * 60) - 5 && !this.warned[mins]) {
+                this.warned[mins] = true;
+                this.notice = text;
+                setTimeout(() => { if (this.notice === text) this.notice = ''; }, 8000);
+            }
+        }
+        if (this.left <= 0 && !this.finished) this.submit(true);
+    },
+
+    go(n) {
+        if (n < 0 || n >= this.total || n === this.i) return;
+        this.spent();
+        this.i = n;
+        this.palette = false;
+        this.signal('presented', { position: this.q.position });
+        this.$nextTick(() => document.getElementById('question-top')?.focus({ preventScroll: false }));
+    },
+
+    // Time spent on a question travels with its next save.
+    spent() {
+        const q = this.q;
+        q._seconds = (q._seconds || 0) + Math.round((Date.now() - this.shownAt) / 1000);
+        this.shownAt = Date.now();
+    },
+
+    set(value) { this.q.response = value; this.enqueue(this.q); },
+    toggle(key) {
+        const now = Array.isArray(this.q.response) ? [...this.q.response] : [];
+        const at = now.indexOf(key);
+        at === -1 ? now.push(key) : now.splice(at, 1);
+        this.set(now);
+    },
+    order() { return this.q.response || this.q.options.map((o) => o.key); },
+    move(index, step) {
+        const keys = [...this.order()];
+        const to = index + step;
+        if (to < 0 || to >= keys.length) return;
+        [keys[index], keys[to]] = [keys[to], keys[index]];
+        this.set(keys);
+    },
+    optionText(key) { return (this.q.options.find((o) => o.key === key) || {}).text; },
+    match(left, right) { this.set({ ...(this.q.response || {}), [left]: right }); },
+    clear() { this.set(null); },
+    flag() { this.q.flagged = !this.q.flagged; this.enqueue(this.q); },
+
+    enqueue(q) {
+        q.revision += 1;
+        if (q === this.q) this.spent();
+        this.queue[q.position] = { position: q.position, revision: q.revision, response: q.response, flagged: q.flagged, seconds: q._seconds || 0 };
+        q._seconds = 0;
+        this.persist();
+        this.state = this.online ? 'saving' : 'offline';
+        clearTimeout(this.flushTimer);
+        this.flushTimer = setTimeout(() => this.flush(), 700);
+    },
+    persist() { try { localStorage.setItem(this.key, JSON.stringify(this.queue)); } catch (e) { /* full or blocked */ } },
+
+    async request(url, body, method = 'POST') {
+        const res = await fetch(url, {
+            method,
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrf, 'X-Requested-With': 'XMLHttpRequest' },
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        let json = {};
+        try { json = await res.json(); } catch (e) { /* empty */ }
+        return { status: res.status, json };
+    },
+
+    async flush() {
+        if (this.sending || this.finished) return;
+        const pending = Object.values(this.queue);
+        if (!pending.length) { if (this.online) this.state = 'saved'; return; }
+        if (!navigator.onLine) { this.state = 'offline'; return; }
+        this.sending = true;
+        this.state = 'saving';
+        try {
+            for (const entry of pending) {
+                const { status, json } = await this.request(config.urls.save, entry);
+                if (status === 409) { this.done(json.result_url); return; }
+                if (status === 422) { this.notice = json.message || 'That answer could not be saved.'; }
+                else if (status >= 400) throw new Error(status);
+                if (json.now) this.offset = json.now - Date.now();
+                if (json.deadline) this.deadline = json.deadline;
+                if (this.queue[entry.position]?.revision === entry.revision) delete this.queue[entry.position];
+            }
+            this.persist();
+            this.online = true;
+            this.state = Object.keys(this.queue).length ? 'saving' : 'saved';
+        } catch (e) {
+            this.state = navigator.onLine ? 'retrying' : 'offline';
+        } finally {
+            this.sending = false;
+        }
+    },
+
+    async sync() {
+        if (!navigator.onLine || this.finished) return;
+        try {
+            const res = await fetch(config.urls.state, { headers: { 'Accept': 'application/json' } });
+            const json = await res.json();
+            this.offset = json.now - Date.now();
+            this.deadline = json.deadline;
+            this.online = true;
+            if (json.status !== 'in_progress') this.done(json.result_url);
+        } catch (e) { /* try again next time */ }
+    },
+
+    signal(type, data = {}) {
+        if (!navigator.onLine && type !== 'online') return;
+        this.request(config.urls.signal, { type, ...data }).catch(() => {});
+    },
+
+    async submit(auto = false) {
+        if (this.submitting) return;
+        this.submitting = true;
+        this.confirming = false;
+        this.spent();
+        if (this.q.revision && this.q._seconds) this.enqueue(this.q);
+        await this.flush();
+        try {
+            const { status, json } = await this.request(config.urls.submit, { auto });
+            if (status >= 400 && status !== 409) throw new Error(status);
+            this.done(json.result_url || config.urls.result);
+        } catch (e) {
+            this.submitting = false;
+            this.state = 'offline';
+            this.notice = auto
+                ? 'Time is up. We could not reach the server, but every answer it already received will be marked. Keep this page open to send the rest.'
+                : 'We could not reach the server. Your answers are kept on this phone. Try again when you are back online.';
+            if (auto) setTimeout(() => { this.submitting = false; this.submit(true); }, 10000);
+        }
+    },
+
+    done(url) {
+        this.finished = true;
+        try { localStorage.removeItem(this.key); } catch (e) { /* ignore */ }
+        window.location.href = url || config.urls.result;
+    },
+}));
+
 // Audio lessons pick up where you left off, even after the page is closed.
 Alpine.data('resumeAudio', (key) => ({
     init() {

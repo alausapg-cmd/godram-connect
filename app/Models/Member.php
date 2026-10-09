@@ -89,6 +89,21 @@ class Member extends Model
         return $this->belongsToMany(ActivityReport::class, 'report_participants')->withPivot('role');
     }
 
+    public function examAttempts(): HasMany
+    {
+        return $this->hasMany(ExamAttempt::class);
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class)->latest('issued_on')->latest('id');
+    }
+
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(MemberAchievement::class)->latest('awarded_on')->latest('id');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

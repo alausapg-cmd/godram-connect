@@ -64,7 +64,7 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         mt_srand(2026);
-        $this->call([AccessSeeder::class, SkillSeeder::class]);
+        $this->call([AccessSeeder::class, SkillSeeder::class, AchievementRuleSeeder::class]);
         $this->membership = app(MembershipService::class);
 
         $national = OrgUnit::root() ?? OrgUnit::create(['type' => 'national', 'name' => 'GODRAM National', 'code' => 'NAT', 'city' => 'Ibadan', 'state' => 'Oyo']);
@@ -126,6 +126,7 @@ class DemoSeeder extends Seeder
         $this->announcements($national, $districts);
         $this->call(MediaDemoSeeder::class);
         $this->call(AcademyDemoSeeder::class);
+        $this->call(ExamDemoSeeder::class);
     }
 
     protected function coordinator(string $roleKey, OrgUnit $scope, OrgUnit $assembly, string $email, ?string $first = null, ?string $last = null): User
@@ -279,7 +280,7 @@ class DemoSeeder extends Seeder
     {
         $author = $this->coordinatorUser('national_coordinator', $national);
         $items = [
-            ['GACASA 2026: registration is open', "The GODRAM Annual Conference of All Saint Artistes holds this December. Every Assembly should send at least two delegates. Registration closes on 30 November.", [['audience' => 'public']], true, 'Register your delegates'],
+            ['GACASA 2026: registration is open', 'The GODRAM Annual Conference of All Saint Artistes holds this December. Every Assembly should send at least two delegates. Registration closes on 30 November.', [['audience' => 'public']], true, 'Register your delegates'],
             ['National Prayer Retreat (GONAPRET)', 'All coordinators and members are invited to the national prayer retreat. Come expecting a fresh fire for the work of the ministry.', [['audience' => 'org_unit', 'org_unit_id' => $national->id]], false, null],
             ['Monthly activity reports are due by the 5th', 'Assembly Coordinators, please submit last month\'s activity reports by the 5th so District Coordinators can review them in good time.', [['audience' => 'role', 'role_key' => 'assembly_coordinator']], false, null],
             ['New on GODRAM TV: Behind the scenes of Valley of Baca', 'Watch the cast share how the film was made and the lives it has touched since its release.', [['audience' => 'public']], false, 'Watch on GODRAM TV'],

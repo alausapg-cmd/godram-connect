@@ -2,14 +2,30 @@
 
 use App\Models\ActivityReport;
 use App\Models\Announcement;
+use App\Models\Certificate;
+use App\Models\Course;
+use App\Models\Event;
+use App\Models\Exam;
 use App\Models\Member;
 use App\Models\OrgUnit;
+use App\Models\Production;
+use App\Models\Question;
 use App\Models\Role;
 use App\Models\RoleAssignment;
+use App\Models\Spotlight;
+use App\Models\Story;
+use App\Models\TransferRequest;
+use App\Models\User;
+use App\Models\Video;
+use App\Services\Achievements;
 use App\Services\AuditLogger;
+use App\Services\Cbt;
 use App\Services\MembershipService;
+use App\Services\YouTubeChannel;
+use App\Support\Phone;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
 
 Artisan::command('audit:verify', function (AuditLogger $audit) {
@@ -45,7 +61,7 @@ Artisan::command('godram:install {--national=GODRAM National}', function (Member
         'first_name' => $this->ask('First name'),
         'last_name' => $this->ask('Last name'),
         'email' => mb_strtolower($this->ask('Email')),
-        'phone' => \App\Support\Phone::normalize($this->ask('Phone (optional)')),
+        'phone' => Phone::normalize($this->ask('Phone (optional)')),
     ], $assembly, null, true, $this->secret('Password (at least 8 characters)'));
 
     foreach (['system_administrator', 'national_coordinator'] as $key) {
@@ -58,7 +74,7 @@ Artisan::command('godram:install {--national=GODRAM National}', function (Member
 })->purpose('Set up GODRAM CONNECT on a fresh database');
 
 Artisan::command('godram:clear-demo', function () {
-    if (! $this->confirm('Remove all demo members, reports, announcements, events, videos, stories, showcase items and Academy training?')) {
+    if (! $this->confirm('Remove all demo members, reports, announcements, events, videos, stories, showcase items, Academy training, examinations and certificates?')) {
         return 1;
     }
     DB::transaction(function () {
@@ -67,24 +83,41 @@ Artisan::command('godram:clear-demo', function () {
             $report->delete();
         }
         Announcement::where('is_demo', true)->delete();
-        \App\Models\Spotlight::with('subject')->get()->filter(fn ($s) => ! $s->subject || $s->subject->is_demo)->each->delete();
-        \App\Models\Story::where('is_demo', true)->delete();
-        \App\Models\Video::where('is_demo', true)->delete();
-        \App\Models\Event::where('is_demo', true)->delete();
-        \App\Models\Production::where('is_demo', true)->delete();
-        \App\Models\Course::where('is_demo', true)->delete();
+        Spotlight::with('subject')->get()->filter(fn ($s) => ! $s->subject || $s->subject->is_demo)->each->delete();
+        Story::where('is_demo', true)->delete();
+        Video::where('is_demo', true)->delete();
+        Event::where('is_demo', true)->delete();
+        Production::where('is_demo', true)->delete();
+        Exam::where('is_demo', true)->delete();
+        Certificate::where('is_demo', true)->delete();
+        Question::where('is_demo', true)->whereDoesntHave('uses')->delete();
+        Course::where('is_demo', true)->delete();
         $ids = Member::where('is_demo', true)->pluck('id');
-        \App\Models\User::whereIn('member_id', $ids)->update(['is_active' => false, 'member_id' => null]);
+        User::whereIn('member_id', $ids)->update(['is_active' => false, 'member_id' => null]);
         RoleAssignment::whereIn('member_id', $ids)->delete();
-        \App\Models\TransferRequest::whereIn('member_id', $ids)->delete();
+        TransferRequest::whereIn('member_id', $ids)->delete();
         Member::whereIn('id', $ids)->delete();
     });
     $this->info('Demo data removed. The organisation structure was kept; edit or replace it under Administration.');
 })->purpose('Remove sample data before real use');
 
-Artisan::command('godram:sync-youtube', function (\App\Services\YouTubeChannel $channel) {
+Artisan::command('godram:sync-youtube', function (YouTubeChannel $channel) {
     $added = $channel->import();
     $this->info($added ? "Added {$added} new GODRAM TV ".str('video')->plural($added).' to the Watch centre.' : 'No new GODRAM TV videos.');
 })->purpose('Add new GODRAM TV uploads to the Watch centre');
 
-\Illuminate\Support\Facades\Schedule::command('godram:sync-youtube')->hourly()->withoutOverlapping();
+Schedule::command('godram:sync-youtube')->hourly()->withoutOverlapping();
+
+Artisan::command('godram:finalise-exams', function (Cbt $cbt) {
+    $count = $cbt->finaliseExpired();
+    if ($count) {
+        $this->info("Submitted {$count} ".str('attempt')->plural($count).' whose time had run out.');
+    }
+})->purpose('Submit examination attempts whose time ran out while the candidate was offline');
+
+Artisan::command('godram:achievements', function (Achievements $achievements) {
+    $this->info($achievements->evaluateAll().' new achievements awarded.');
+})->purpose('Check every member against the achievement rules');
+
+Schedule::command('godram:finalise-exams')->everyMinute()->withoutOverlapping();
+Schedule::command('godram:achievements')->dailyAt('02:30')->withoutOverlapping();

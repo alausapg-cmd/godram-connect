@@ -45,9 +45,9 @@
             </div>
         @endif
 
-        <div class="mt-8 rounded-xl bg-paper-2 p-4 text-sm">
-            <p class="font-semibold">Results and certificates</p>
-            <p class="mt-1 text-ink-soft">Online examinations, results and verifiable certificates are being added to the Academy. Your completed lessons and assignments will count towards them.</p>
+        <div class="mt-8 grid gap-3 sm:grid-cols-2">
+            <a href="{{ route('exams.index') }}" class="card-pad flex items-center gap-3 no-underline hover:border-ink-soft"><x-icon name="pen" class="size-8 text-curtain" /><span><span class="block font-semibold">My examinations</span><span class="text-sm text-ink-soft">Practice and certification examinations open to you</span></span></a>
+            <a href="{{ route('certificates.mine') }}" class="card-pad flex items-center gap-3 no-underline hover:border-ink-soft"><x-icon name="award" class="size-8 text-gold" /><span><span class="block font-semibold">My certificates</span><span class="text-sm text-ink-soft">Certificates and your achievement timeline</span></span></a>
         </div>
     </section>
 </x-layouts.app>
