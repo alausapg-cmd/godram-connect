@@ -159,6 +159,38 @@ class Certificates
         return (new QRCode($options))->render($text);
     }
 
+    /**
+     * The soft peach-to-ivory-to-gold wash behind the recognition certificate.
+     * PDF renderers cannot draw CSS gradients, so it is painted once as a picture and kept.
+     */
+    public function gradient(): string
+    {
+        $path = 'certificate-assets/recognition-v1.png';
+        if (! Storage::disk('local')->exists($path)) {
+            [$w, $h] = [600, 424];
+            $img = imagecreatetruecolor($w, $h);
+            $stops = [[0.0, [252, 222, 206]], [0.45, [255, 250, 243]], [1.0, [251, 236, 196]]];
+            for ($y = 0; $y < $h; $y++) {
+                for ($x = 0; $x < $w; $x++) {
+                    $t = ($x / $w) * 0.6 + ($y / $h) * 0.4;
+                    // a gentle glow behind the name
+                    $glow = max(0, 1 - hypot(($x - $w / 2) / ($w * 0.45), ($y - $h * 0.45) / ($h * 0.45)));
+                    for ($i = 1; $i < count($stops) && $t > $stops[$i][0]; $i++);
+                    [$t0, $c0] = $stops[$i - 1];
+                    [$t1, $c1] = $stops[$i];
+                    $f = ($t - $t0) / max(0.001, $t1 - $t0);
+                    $rgb = array_map(fn ($a, $b) => (int) min(255, $a + ($b - $a) * $f + 10 * $glow), $c0, $c1);
+                    imagesetpixel($img, $x, $y, ($rgb[0] << 16) | ($rgb[1] << 8) | $rgb[2]);
+                }
+            }
+            ob_start();
+            imagepng($img);
+            Storage::disk('local')->put($path, ob_get_clean());
+        }
+
+        return 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get($path));
+    }
+
     /** An unsaved sample of each design, so officers can see what members will receive. */
     public function specimen(string $kind): Certificate
     {
@@ -185,6 +217,7 @@ class Certificates
         $design = array_key_exists($certificate->kind, Certificate::KINDS) ? $certificate->kind : 'examination';
         $html = view('certificates.designs.'.$design, [
             'specimen' => $specimen,
+            'background' => $design === 'recognition' ? $this->gradient() : null,
             'certificate' => $certificate,
             'qr' => $this->qrDataUri($certificate->verifyUrl()),
             'logo' => 'data:image/png;base64,'.base64_encode(file_get_contents(public_path('icons/icon-192.png'))),
