@@ -8,7 +8,7 @@
     .i2 { position: absolute; top: 13.8mm; left: 13.8mm; right: 13.8mm; bottom: 13.8mm; }
     .clip { position: absolute; overflow: hidden; }
     .content { position: absolute; top: 21mm; left: 30mm; width: 237mm; text-align: center; }
-    .logo { width: 14mm; height: 14mm; }
+    .logo { width: 22mm; height: 22mm; }
     .banner { display: inline-block; margin-top: 3mm; padding: 1.8mm 9mm; background: #b3261e; color: #ffffff; font-size: 10px; letter-spacing: 5px; }
     h1 { margin: 5mm 0 0; font-size: 44px; color: #b3261e; letter-spacing: 0.5px; }
     .to { font-size: 13px; color: #5d544c; margin-top: 4mm; }

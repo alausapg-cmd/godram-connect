@@ -17,6 +17,9 @@ return [
     ],
 
     // Certificates. {Y} is the year of issue and {N} a running number for that year.
+    // The official GODRAM emblem. Every logo in the app (header, icons, certificates) comes from these files.
+    'logo' => ['svg' => 'images/godram-logo.svg', 'png' => 'images/godram-logo.png'],
+
     'certificates' => [
         'number_format' => env('GODRAM_CERTIFICATE_FORMAT', 'GODRAM-CERT-{Y}-{N}'),
         'number_digits' => 6,

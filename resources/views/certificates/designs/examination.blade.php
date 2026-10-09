@@ -7,7 +7,7 @@
     .f2b { position: absolute; top: 13.9mm; left: 13.9mm; right: 13.9mm; bottom: 13.9mm; background: #ffffff; }
     .c { position: absolute; width: 9mm; height: 9mm; background: #e5622a; }
     .content { position: absolute; top: 24mm; left: 30mm; width: 237mm; text-align: center; }
-    .logo { width: 15mm; height: 15mm; }
+    .logo { width: 22mm; height: 22mm; }
     .org { font-size: 10px; letter-spacing: 5px; color: #5d544c; margin-top: 2mm; }
     .kicker { display: inline-block; margin-top: 6mm; padding: 1.4mm 5mm; background: #16120f; color: #f0b03c; font-size: 10px; letter-spacing: 4px; }
     h1 { margin: 4mm 0 0; font-size: 40px; color: #16120f; letter-spacing: 1px; }

@@ -20,6 +20,7 @@
     {{-- Top bar: title, timer and connection. Stays in view. --}}
     <header class="sticky top-0 z-30 bg-stage text-paper shadow-lg">
         <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5">
+            <x-logo class="size-10" />
             <div class="min-w-0 flex-1">
                 <p class="truncate font-display text-base font-semibold uppercase leading-tight sm:text-lg">{{ $exam->title }}</p>
                 <p class="truncate text-xs text-paper/60">{{ $exam->course?->title ?? $exam->modeLabel().' examination' }} · Attempt {{ $attempt->number }}</p>

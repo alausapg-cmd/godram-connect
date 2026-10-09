@@ -220,7 +220,7 @@ class Certificates
             'background' => $design === 'recognition' ? $this->gradient() : null,
             'certificate' => $certificate,
             'qr' => $this->qrDataUri($certificate->verifyUrl()),
-            'logo' => 'data:image/png;base64,'.base64_encode(file_get_contents(public_path('icons/icon-192.png'))),
+            'logo' => 'data:image/png;base64,'.base64_encode(file_get_contents(public_path(config('godram.logo.png')))),
             'signatures' => collect($certificate->signatories)->map(fn ($s) => $s + ['image' => $image($s['signature'] ?? null)]),
         ])->render();
 

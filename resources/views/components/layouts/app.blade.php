@@ -57,8 +57,8 @@
 
 <header class="bg-stage text-paper">
     <div class="container-page flex h-16 items-center justify-between gap-4">
-        <a href="{{ route('home') }}" class="flex items-center gap-2.5 no-underline" aria-label="GODRAM CONNECT home">
-            <span class="poster-stripe block h-8 w-1.5 rounded-full" aria-hidden="true"></span>
+        <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5 no-underline" aria-label="GODRAM CONNECT home">
+            <x-logo class="size-12" alt="" />
             <span class="font-display text-2xl font-bold uppercase leading-none tracking-wide text-paper">Godram</span>
             <span class="mt-1 font-display text-xs font-medium uppercase leading-none tracking-[0.3em] text-gold">Connect</span>
         </a>
@@ -78,8 +78,8 @@
                     <button class="rounded-full p-2 text-paper/70 hover:text-white" title="Sign out"><x-icon name="logout" /><span class="sr-only">Sign out</span></button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="hidden rounded-full px-4 py-2 text-sm font-semibold text-paper no-underline hover:bg-white/10 sm:inline-flex">Sign in</a>
-                <a href="{{ route('register') }}" class="btn-primary btn-sm no-underline">Join GODRAM</a>
+                <a href="{{ route('login') }}" class="hidden rounded-full px-4 py-2 whitespace-nowrap text-sm font-semibold text-paper no-underline hover:bg-white/10 sm:inline-flex">Sign in</a>
+                <a href="{{ route('register') }}" class="btn-primary btn-sm whitespace-nowrap no-underline">Join GODRAM</a>
             @endauth
         </div>
     </div>

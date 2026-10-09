@@ -6,8 +6,8 @@
     .b3 { position: absolute; top: 14mm; left: 14mm; right: 14mm; bottom: 14mm; border: 0.4mm solid #a86411; }
     .corner { position: absolute; width: 16mm; height: 16mm; border-radius: 8mm; background: #f0b03c; border: 0.8mm solid #a86411; }
     .content { position: absolute; top: 22mm; left: 30mm; width: 237mm; text-align: center; }
-    .medal { width: 30mm; height: 30mm; margin: 0 auto; border-radius: 15mm; background: #f0b03c; border: 1.4mm solid #a86411; color: #16120f; }
-    .medal .star { font-size: 40px; padding-top: 5.5mm; text-align: center; }
+    .logo { width: 28mm; height: 28mm; }
+    .corner .star { font-size: 26px; color: #a86411; text-align: center; line-height: 1; padding-top: 2.6mm; }
     .kicker { margin-top: 3mm; font-size: 10px; letter-spacing: 5px; color: #a86411; }
     h1 { margin: 2mm 0 0; font-size: 42px; color: #16120f; }
     .to { font-size: 13px; color: #5d544c; margin-top: 4mm; }
@@ -21,10 +21,10 @@
 @endsection
 @section('body')
     <div class="b1"></div><div class="b2"></div><div class="b3"></div>
-    <div class="corner" style="top: 5mm; left: 5mm;"></div><div class="corner" style="top: 5mm; right: 5mm;"></div>
-    <div class="corner" style="bottom: 5mm; left: 5mm;"></div><div class="corner" style="bottom: 5mm; right: 5mm;"></div>
+    <div class="corner" style="top: 5mm; left: 5mm;"><div class="star">&#9733;</div></div><div class="corner" style="top: 5mm; right: 5mm;"><div class="star">&#9733;</div></div>
+    <div class="corner" style="bottom: 5mm; left: 5mm;"><div class="star">&#9733;</div></div><div class="corner" style="bottom: 5mm; right: 5mm;"><div class="star">&#9733;</div></div>
     <div class="content">
-        <div class="medal"><div class="star">&#9733;</div></div>
+        <img src="{{ $logo }}" class="logo" alt="">
         <div class="kicker">GODRAM ACHIEVEMENT AWARD</div>
         <h1 class="serif">{{ $certificate->title }}</h1>
         <div class="to">This is proudly presented to</div>

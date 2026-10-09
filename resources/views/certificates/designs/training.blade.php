@@ -3,8 +3,8 @@
     .page { background: #fbf6ec; }
     .band { position: absolute; top: 0; left: 0; width: 297mm; height: 30mm; background: #b3261e; }
     .band2 { position: absolute; top: 30mm; left: 0; width: 297mm; height: 2.2mm; background: #f0b03c; }
-    .logo { position: absolute; top: 7mm; left: 16mm; width: 16mm; height: 16mm; }
-    .academy { position: absolute; top: 9.5mm; left: 36mm; color: #fff; }
+    .logo { position: absolute; top: 3mm; left: 14mm; width: 24mm; height: 24mm; }
+    .academy { position: absolute; top: 9.5mm; left: 42mm; color: #fff; }
     .academy .a1 { font-size: 20px; font-weight: bold; letter-spacing: 3px; }
     .academy .a2 { font-size: 10px; letter-spacing: 3px; opacity: 0.85; }
     .kicker { position: absolute; top: 12mm; right: 16mm; color: #fff; font-size: 10px; letter-spacing: 4px; }
