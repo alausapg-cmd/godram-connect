@@ -1,11 +1,12 @@
 @php $shareUrl = route('events.show', $event); @endphp
 <x-layouts.app :title="$event->title" :description="\Illuminate\Support\Str::limit($event->description, 160)"
                :image="$event->visibility === 'public' ? route('share.card', ['event', $event->slug]) : null">
-    <section class="relative overflow-hidden bg-stage text-paper">
+    <section class="relative isolate overflow-hidden bg-stage text-paper">
         @if ($event->coverUrl())
-            <img src="{{ $event->coverUrl() }}" alt="" class="absolute inset-0 size-full object-cover opacity-30">
-            <div class="absolute inset-0 bg-gradient-to-r from-stage via-stage/90 to-stage/40"></div>
+            <img src="{{ $event->coverUrl() }}" alt="" class="absolute inset-0 -z-10 size-full object-cover">
         @endif
+        <div class="hero-shade absolute inset-0 -z-10" aria-hidden="true"></div>
+        <div class="poster-stripe absolute inset-x-0 bottom-0 h-1.5" aria-hidden="true"></div>
         <div class="container-page relative py-10 sm:py-14">
             <a href="{{ route('events') }}" class="text-sm font-semibold text-gold no-underline">Events</a>
             <p class="eyebrow mt-4 flex flex-wrap items-center gap-2 text-gold">{{ $event->typeLabel() }}

@@ -3,7 +3,8 @@
     $moderateBase = $canTeach ? route('academy.manage.questions.moderate', [$course, 0]) : null;
 @endphp
 <x-layouts.app :title="'Live class: '.$session->title" :description="$course->title">
-    <section class="bg-stage text-paper">
+    <section class="relative isolate overflow-hidden bg-stage text-paper">
+        <div class="hero-shade absolute inset-0 -z-10" aria-hidden="true"></div>
         <div class="container-page py-6">
             <a href="{{ route('academy.show', $course) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-gold no-underline"><x-icon name="arrow-left" class="size-4" /> {{ $course->title }}</a>
             <div class="mt-3 flex flex-wrap items-end justify-between gap-4">

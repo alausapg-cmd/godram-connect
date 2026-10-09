@@ -1,25 +1,16 @@
 <x-layouts.app description="GODRAM CONNECT brings together the GOFAMINT Drama & Film Ministry: its members, stages, films, training and stories.">
     {{-- Hero --}}
-    <section class="relative overflow-hidden bg-stage text-paper">
-        <div class="absolute inset-0 grid grid-cols-3 opacity-35" aria-hidden="true">
-            <img src="{{ asset('images/archive/godram-10.webp') }}" alt="" class="h-full w-full object-cover">
-            <img src="{{ asset('images/archive/godram-11.webp') }}" alt="" class="h-full w-full object-cover">
-            <img src="{{ asset('images/archive/godram-21.webp') }}" alt="" class="h-full w-full object-cover">
+    <x-hero page="home" size="lg" eyebrow="GOFAMINT Drama & Film Ministry">
+        <x-slot:heading>
+            <h1 class="hero-title mt-3 text-5xl sm:text-7xl">The Stage.<br>The Story.<br><span class="text-poster">The Mission.</span></h1>
+        </x-slot:heading>
+        <p class="mt-5 max-w-xl text-lg text-paper/90 [text-shadow:0_1px_8px_rgb(0_0_0/0.5)]">Since 1991, GODRAM has carried the Gospel through drama and film, from Assembly halls to the National Theatre. GODRAM CONNECT brings the whole ministry together in one place.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+            <a href="{{ route('about') }}" class="btn-primary no-underline">Explore GODRAM <x-icon name="arrow-right" class="size-4" /></a>
+            <a href="{{ route('watch') }}" class="btn border border-paper/30 bg-black/20 text-paper no-underline backdrop-blur-sm hover:bg-white/10"><x-icon name="play" class="size-4" /> Watch GODRAM TV</a>
+            @guest<a href="{{ route('register') }}" class="btn-gold no-underline">Join the movement</a>@endguest
         </div>
-        <div class="absolute inset-0 bg-gradient-to-r from-stage via-stage/85 to-stage/40" aria-hidden="true"></div>
-        <div class="container-page relative py-16 sm:py-24">
-            <p class="eyebrow text-gold">GOFAMINT Drama &amp; Film Ministry</p>
-            <h1 class="mt-3 max-w-3xl font-display text-5xl font-bold uppercase leading-[0.95] sm:text-7xl">
-                The Stage.<br>The Story.<br><span class="text-poster">The Mission.</span>
-            </h1>
-            <p class="mt-5 max-w-xl text-lg text-paper/85">Since 1991, GODRAM has carried the Gospel through drama and film, from Assembly halls to the National Theatre. GODRAM CONNECT brings the whole ministry together in one place.</p>
-            <div class="mt-8 flex flex-wrap gap-3">
-                <a href="{{ route('about') }}" class="btn-primary no-underline">Explore GODRAM <x-icon name="arrow-right" class="size-4" /></a>
-                <a href="{{ route('watch') }}" class="btn border border-paper/30 text-paper no-underline hover:bg-white/10"><x-icon name="play" class="size-4" /> Watch GODRAM TV</a>
-                @guest<a href="{{ route('register') }}" class="btn-gold no-underline">Join the movement</a>@endguest
-            </div>
-        </div>
-    </section>
+    </x-hero>
 
     {{-- Network at a glance --}}
     <section class="border-b border-line bg-white">

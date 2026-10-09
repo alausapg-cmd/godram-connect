@@ -1,19 +1,15 @@
 <x-layouts.app title="Events" description="GODRAM performances, workshops, conventions, premieres and live broadcasts.">
-    <section class="bg-stage text-paper">
-        <div class="container-page py-10 sm:py-14">
-            <p class="eyebrow text-gold">Performances, trainings and programmes</p>
-            <div class="mt-2 flex flex-wrap items-end justify-between gap-4">
-                <h1 class="font-display text-4xl font-semibold uppercase sm:text-5xl">Events</h1>
-                @if ($canCreate)<a href="{{ route('events.create') }}" class="btn-gold no-underline"><x-icon name="plus" class="size-4" /> Add an event</a>@endif
-            </div>
-            <nav class="mt-6 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]" aria-label="Event types">
-                <a href="{{ route('events') }}" @class(['shrink-0 rounded-full px-3.5 py-1.5 text-sm no-underline', 'bg-gold font-semibold text-stage' => ! $type, 'bg-white/10 text-paper/80 hover:text-white' => $type])>All</a>
-                @foreach (\App\Models\Event::TYPES as $key => $label)
-                    <a href="{{ route('events', ['type' => $key]) }}" @class(['shrink-0 rounded-full px-3.5 py-1.5 text-sm no-underline', 'bg-gold font-semibold text-stage' => $type === $key, 'bg-white/10 text-paper/80 hover:text-white' => $type !== $key])>{{ $label }}</a>
-                @endforeach
-            </nav>
+    <x-hero page="events" eyebrow="Performances, trainings and programmes" title="Events" lead="Drama crusades, conventions, trainings and programmes across every Assembly, District and Region.">
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+            @if ($canCreate)<a href="{{ route('events.create') }}" class="btn-gold no-underline"><x-icon name="plus" class="size-4" /> Add an event</a>@endif
         </div>
-    </section>
+        <nav class="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible" aria-label="Event types">
+            <a href="{{ route('events') }}" @class(['shrink-0 rounded-full px-3.5 py-1.5 text-sm no-underline backdrop-blur-sm', 'bg-gold font-semibold text-stage' => ! $type, 'bg-black/25 text-paper/85 ring-1 ring-paper/20 hover:text-white' => $type])>All</a>
+            @foreach (\App\Models\Event::TYPES as $key => $label)
+                <a href="{{ route('events', ['type' => $key]) }}" @class(['shrink-0 rounded-full px-3.5 py-1.5 text-sm no-underline backdrop-blur-sm', 'bg-gold font-semibold text-stage' => $type === $key, 'bg-black/25 text-paper/85 ring-1 ring-paper/20 hover:text-white' => $type !== $key])>{{ $label }}</a>
+            @endforeach
+        </nav>
+    </x-hero>
 
     @if ($live->isNotEmpty())
         <section class="border-b border-curtain/30 bg-curtain/5">

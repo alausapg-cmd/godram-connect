@@ -1,6 +1,42 @@
 import Alpine from 'alpinejs';
 
 // Saves a form quietly in the background so a dropped connection never loses work.
+// Page header carousel: changes picture every few seconds, pauses while the
+// reader hovers, focuses or hides the tab, and only fetches a picture just
+// before it is shown, to spare mobile data.
+Alpine.data('carousel', (count, delay = 6500) => ({
+    i: 0,
+    seen: [0, 1],
+    playing: false,
+    held: false,
+    timer: null,
+    x: null,
+    init() {
+        if (count < 2) return;
+        this.playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.run();
+        document.addEventListener('visibilitychange', () => this.run());
+    },
+    run() {
+        clearInterval(this.timer);
+        if (this.playing && !this.held && !document.hidden) this.timer = setInterval(() => this.go(this.i + 1), delay);
+    },
+    go(n) {
+        this.i = (n + count) % count;
+        for (const k of [this.i, (this.i + 1) % count]) if (!this.seen.includes(k)) this.seen.push(k);
+    },
+    choose(n) { this.go(n); this.run(); },
+    toggle() { this.playing = !this.playing; this.run(); },
+    hold(on) { this.held = on; this.run(); },
+    touchStart(e) { this.x = e.changedTouches[0].clientX; },
+    touchEnd(e) {
+        if (this.x === null) return;
+        const dx = e.changedTouches[0].clientX - this.x;
+        this.x = null;
+        if (Math.abs(dx) > 40) this.choose(this.i + (dx < 0 ? 1 : -1));
+    },
+}));
+
 Alpine.data('autosave', (url, intervalMs = 8000) => ({
     dirty: false,
     state: 'saved',

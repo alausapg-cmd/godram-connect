@@ -19,16 +19,11 @@ $colleges = [
 ];
 @endphp
 <x-layouts.app title="About GODRAM" description="The story of the GOFAMINT Drama & Film Ministry, from film outreaches in the 1960s to a national department and beyond.">
-    <section class="bg-stage text-paper">
-        <div class="container-page grid items-center gap-8 py-14 md:grid-cols-[1.3fr_1fr]">
-            <div>
-                <p class="eyebrow text-gold">About GODRAM</p>
-                <h1 class="mt-2 font-display text-4xl font-bold uppercase leading-tight sm:text-6xl">Drama and film<br>for the Gospel</h1>
-                <p class="mt-5 max-w-xl text-lg text-paper/85">GODRAM is the Drama &amp; Film Ministry of the Gospel Faith Mission International. Through live drama, films, photo drama and training, it has planted churches, restored homes and raised a generation of creative ministers.</p>
-            </div>
-            <img src="{{ asset('images/archive/godram-10.webp') }}" alt="Poster for the 1994 Victory Drama Crusade, Majemu (Covenant)" class="mx-auto max-h-96 rotate-1 rounded-lg shadow-2xl">
-        </div>
-    </section>
+    <x-hero page="about" eyebrow="About GODRAM" lead="GODRAM is the Drama & Film Ministry of the Gospel Faith Mission International. Through live drama, films, photo drama and training, it has planted churches, restored homes and raised a generation of creative ministers.">
+        <x-slot:heading>
+            <h1 class="hero-title mt-3 text-4xl sm:text-6xl">Drama and film<br>for the Gospel</h1>
+        </x-slot:heading>
+    </x-hero>
 
     <section class="container-page mt-14 grid gap-10 lg:grid-cols-[2fr_1fr]">
         <div>

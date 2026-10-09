@@ -1,12 +1,6 @@
 <x-layouts.app title="GODRAM Virtual Academy" description="Training, live classes and practical assignments for drama ministers across GODRAM.">
-    <section class="relative overflow-hidden bg-stage text-paper">
-        <img src="{{ asset('images/archive/godram-12.webp') }}" alt="" class="absolute inset-0 size-full object-cover opacity-25">
-        <div class="absolute inset-0 bg-gradient-to-r from-stage via-stage/95 to-stage/50"></div>
-        <div class="container-page relative py-12 sm:py-16">
-            <p class="eyebrow text-gold">Learn · Practise · Minister</p>
-            <h1 class="mt-2 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.05] sm:text-6xl">GODRAM Virtual Academy</h1>
-            <p class="mt-4 max-w-2xl text-lg text-paper/80">Carrying forward the GODRAM Institute of Christian Drama, whose first 41 drama ministers graduated in 1995. Training from the National office, your Region and your District, in one place.</p>
-            <div class="mt-6 flex flex-wrap gap-2">
+    <x-hero page="academy" eyebrow="Learn · Practise · Minister" title="GODRAM Virtual Academy" lead="Carrying forward the GODRAM Institute of Christian Drama, whose first 41 drama ministers graduated in 1995. Training from the National office, your Region and your District, in one place.">
+        <div class="mt-6 flex flex-wrap gap-2">
                 @auth
                     @if (auth()->user()->member_id)<a href="{{ route('academy.mine') }}" class="btn-gold no-underline"><x-icon name="academy" class="size-4" /> My learning</a>@endif
                     @if ($canManage)<a href="{{ route('academy.manage.index') }}" class="btn-sm inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-5 text-sm font-semibold text-paper no-underline hover:bg-white/20"><x-icon name="list" class="size-4" /> Manage training</a>@endif
@@ -15,9 +9,8 @@
                     <a href="{{ route('login') }}" class="btn-gold no-underline">Sign in to enrol</a>
                     <a href="{{ route('register') }}" class="btn-sm inline-flex min-h-11 items-center rounded-full bg-white/10 px-5 text-sm font-semibold text-paper no-underline hover:bg-white/20">Join GODRAM</a>
                 @endauth
-            </div>
         </div>
-    </section>
+    </x-hero>
 
     @if ($live->isNotEmpty())
         <section class="container-page mt-8">

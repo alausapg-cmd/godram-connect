@@ -1,7 +1,10 @@
 <x-layouts.app :title="$production->title" :description="$production->summary ?? $production->kindLabel().' from the GODRAM Creative Showcase.'"
                :image="$production->status === 'published' ? route('share.card', ['showcase', $production->slug]) : null">
     <article>
-        <header class="relative bg-stage text-paper">
+        <header class="relative isolate overflow-hidden bg-stage text-paper">
+            @if ($production->coverUrl())<img src="{{ $production->coverUrl() }}" alt="" class="hero-wash -z-10" aria-hidden="true">@endif
+            <div class="hero-shade absolute inset-0 -z-10" aria-hidden="true"></div>
+            <div class="poster-stripe absolute inset-x-0 bottom-0 h-1.5" aria-hidden="true"></div>
             <div class="container-page grid gap-8 py-10 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:py-14">
                 <div>
                     <a href="{{ route('showcase') }}" class="text-sm font-semibold text-gold no-underline">Creative Showcase</a>
